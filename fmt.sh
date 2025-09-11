@@ -1,6 +1,9 @@
 #!/bin/sh
 
-SRC=$(echo *.c)
-H=$(echo *.h)
+fmt() {
+	echo "Fmt $1"
+	clang-format -i -style=file:clang-format "$1"
+}
 
-clang-format -i -style=file:clang-format "$SRC" "$H"
+ls *.c | while read fp; do fmt "$fp"; done
+ls *.h | while read fp; do fmt "$fp"; done

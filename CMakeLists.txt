@@ -12,20 +12,16 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS_DEBUG "")
 
-set(SRC main.c)
+set(SRC main.c piece.c board.c)
 set(H "")
 
 add_executable(cmc-chess ${SRC})
 
 # This project is meant to be fun!
-# At first I thought to use C89, strict ANSI. However, there is a substantial
-# difference between FUN and PAIN. So i decided to use C99, pedantic, in order
-# to take advantage of some improvement of the standard that alleviate the pain
-# (i.e. stdint.h) and to forbid some bad habits that C99 developers are usually
-# prone to by the means of -W* and -Werror*.
-# There will be no declaration after statement.
-set_property(TARGET cmc-chess PROPERTY C_STANDARD 99)
-set_property(TARGET cmc-chess PROPERTY C_EXTENSIONS OFF)
+# The C standard is C89, strict ANSI.
+# set_property(TARGET cmc-chess PROPERTY C_STANDARD 90)
+# set_property(TARGET cmc-chess PROPERTY C_EXTENSIONS OFF)
+target_compile_options(cmc-chess PRIVATE -std=c89)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	message("Compiler is supported.")
@@ -40,8 +36,7 @@ target_compile_options(cmc-chess PRIVATE
 	-fanalyzer -fno-common -fPIC -Wfatal-errors
 
 	# Style
-	-Wno-comments # -Werror=no-comments
-	-Wdeclaration-after-statement -Werror=declaration-after-statement
+	# -Wdeclaration-after-statement -Werror=declaration-after-statement
 )
 
 # Basic Warnings
