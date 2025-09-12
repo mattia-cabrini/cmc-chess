@@ -10,11 +10,15 @@
 
 void clear(void);
 
+/* Return true is no error occurred while reading; false otherwise */
+int read_command(char* comm, size_t n);
+
 int main(int argc, char** argv)
 {
     struct chess_board_t board;
-    char                 move[16];
-    int                  rF, cF, rT, cT;
+    char                 comm[16];
+    const char*          illegal_move;
+    struct move_t        m;
 
     (void)argc;
     (void)argv;
@@ -26,29 +30,29 @@ int main(int argc, char** argv)
         /* clear(); */
         chess_board_print(&board);
 
-        for (move[0] = 0; strlen(move) < 4;)
+        for (comm[0] = 0; strlen(comm) < 4;)
         {
             printf("Command: ");
 
-            if (scanf("%s", move) != 1)
+            if (!read_command(comm, sizeof(comm)))
                 exit(1);
 
-            if (strlen(move) < 4)
+            if (strlen(comm) < 4)
                 printf("???\n");
+
+            move_init(comm, &m);
+
+            illegal_move = chess_board_check_move(&board, &m);
+            if (illegal_move != NULL)
+            {
+                printf("Illegal move: %s\n", illegal_move);
+                comm[0] = '\0';
+            }
+            else
+            {
+                chess_board_exec(&board, &m);
+            }
         }
-
-        chess_board_coord_to_idx(move, &rF, &cF);
-        chess_board_coord_to_idx(move + 2, &rT, &cT);
-
-        printf("From r-c=c%d-%d to r-c=%d-%d", rF, cF, rT, cT);
-
-        printf(
-            "From: %c\n",
-            chess_piece_to_char(chess_board_get_at(&board, rF, cF))
-        );
-        printf(
-            "To: %c\n", chess_piece_to_char(chess_board_get_at(&board, rT, cT))
-        );
     }
 
     exit(0);
@@ -63,4 +67,10 @@ void clear(void)
 
     for (i = 0; i < sizeof(CV); ++i)
         putc(CV[i], stdout);
+}
+
+int read_command(char* comm, size_t n)
+{
+    fflush(stdin);
+    return fgets(comm, (int)n, stdin) != NULL;
 }
