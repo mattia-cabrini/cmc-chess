@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define TO_UPPER_MASK 0xDF
+
 const chess_piece_t DEFAULT_BOARD[] = {
     cpBROOK,  cpBKNIGHT, cpBBISHOP, cpBKING,  cpBQUEEN, cpBBISHOP, cpBKNIGHT,
     cpBROOK,  cpBPAWN,   cpBPAWN,   cpBPAWN,  cpBPAWN,  cpBPAWN,   cpBPAWN,
