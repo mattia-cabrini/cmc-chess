@@ -89,7 +89,7 @@ void read_command(char* comm, size_t n)
 {
     size_t len;
 
-	/* Does not take into account the terminal buffer */
+    /* Does not take into account the terminal buffer */
     fflush(stdin);
     comm = fgets(comm, (int)n, stdin);
 

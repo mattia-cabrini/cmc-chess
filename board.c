@@ -48,6 +48,8 @@ static const char* board_is_illegal_BISHOP_move(board_p B, move_p M);
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M);
 static const char* board_is_illegal_KING_move(board_p B, move_p M);
 
+static const char* board_colour(int row, int col);
+
 piece_t board_get_at(board_p B, int row, int col)
 {
     return B->board[8 * row + col];
@@ -79,7 +81,7 @@ void board_print(board_p B)
         for (c = 0; c < 8; ++c)
         {
             piece_t p = board_get_at(B, r, c);
-            printf("%c ", piece_to_char(p));
+            printf("%s%c\x1b[0m ", board_colour(r, c), piece_to_char(p));
         }
     }
 
@@ -259,4 +261,18 @@ void board_exec(board_p B, move_p M)
     tmp = board_get_at(B, M->source.row, M->source.col);
     board_set_at(B, M->source.row, M->source.col, cpEEMPTY);
     board_set_at(B, M->dest.row, M->dest.col, tmp);
+}
+
+static const char* board_colour(int row, int col)
+{
+    /* I'm only interested in whether row and col are odd or even */
+    row &= 1;
+    col &= 1;
+
+    if (row == col)
+		/* Reset; Bold; Foreground Black; Background White */
+        return "\x1b[0;1;30;47m";
+    else
+		/* Reset; Bold; Foreground White; Background Black */
+        return "\x1b[0;1;40;37m";
 }
