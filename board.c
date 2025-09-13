@@ -27,17 +27,15 @@ const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND =
     "source coordinates are out of bound";
 const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND =
     "destination coordinates are out of bound";
-const char* ILLEGAL_MOVE_FROM_IS_EMPTY = "source is empty";
-const char* ILLEGAL_MOVE_FMT           = "invalid format";
-const char* ILLEGAL_MOVE_NOT_YOUR_TURN = "not your turn";
+const char* ILLEGAL_MOVE_FROM_IS_EMPTY       = "source is empty";
+const char* ILLEGAL_MOVE_FMT                 = "invalid format";
+const char* ILLEGAL_MOVE_NOT_YOUR_TURN       = "not your turn";
 
-const char* ILLEGAL_MOVE_PAWN_DEF =
-    "pawn in default position can only move forward by two rows or take over "
-    "by one diagonal position";
-const char* ILLEGAL_MOVE_PAWN_1 = "pawn can only move forward by one row or "
-                                  "take over by one diagonal position";
-const char* ILLEGAL_MOVE_PAWN_FORWARD        = "pawn can only move forward";
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
+const char* ILLEGAL_MOVE_PAWN_DESC =
+    "pawn can only go forward:\n - By two position, if still in default "
+    "position;\n - By one position, if not in default position.\n\nA pawn can "
+    "only take over by one diagonal position.\n";
 
 static void move_init_part(char* str, int* r, int* c);
 
@@ -137,45 +135,67 @@ const char* board_check_move(board_p B, move_p M, turn_t turn)
 
 static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 {
+    int     ko = 0;
     piece_t source_piece;
     piece_t dest_piece;
 
     source_piece = board_get_at(B, M->source.row, M->source.col);
     dest_piece   = board_get_at(B, M->dest.row, M->dest.col);
 
-    if (M->source.col - M->dest.col > 1 || M->source.col - M->dest.col < -1)
-        return ILLEGAL_MOVE_PAWN_DEF;
+    if (M->offset.col > 1 || M->offset.col < -1)
+        return ILLEGAL_MOVE_PAWN_DESC;
 
     if (source_piece < 0)
     {
-        if (M->dest.row < M->source.row)
-            return ILLEGAL_MOVE_PAWN_FORWARD;
+        /* Tying to go back */
+        if (M->offset.row < 0)
+            ko = 1;
 
-        if (M->source.row == 1 && M->dest.row - M->source.row > 2)
-            return ILLEGAL_MOVE_PAWN_DEF;
+        if (M->offset.col == 0)
+        {
+            /* Move forward */
+            ko = ko || (M->source.row == 1 && M->offset.row > 2);
+            ko = ko || (M->source.row != 1 && M->offset.row > 1);
+            ko = ko || (dest_piece != cpEEMPTY);
 
-        if (M->source.row != 1 && M->dest.row - M->source.row > 1)
-            return ILLEGAL_MOVE_PAWN_1;
-
-        if (M->source.col - M->dest.col != 0 &&
-            (dest_piece == cpEEMPTY || dest_piece < 0))
-            return ILLEGAL_MOVE_PAWN_1;
+            ko = ko || (M->offset.row == 2 &&
+                        board_get_at(B, M->source.row + 1, M->source.col) !=
+                            cpEEMPTY);
+        }
+        else
+        {
+            /* Take over */
+            ko = ko || (M->offset.row > 1);
+            ko = ko || (dest_piece == cpEEMPTY);
+        }
     }
     else
     {
-        if (M->dest.row > M->source.row)
-            return ILLEGAL_MOVE_PAWN_FORWARD;
+        /* Tying to go back */
+        if (M->offset.row > 0)
+            ko = 1;
 
-        if (M->source.row == 6 && M->source.row - M->dest.row > 2)
-            return ILLEGAL_MOVE_PAWN_DEF;
+        if (M->offset.col == 0)
+        {
+            /* Move forward */
+            ko = ko || (M->source.row == 6 && M->offset.row < -2);
+            ko = ko || (M->source.row != 6 && M->offset.row < -1);
+            ko = ko || (dest_piece != cpEEMPTY);
 
-        if (M->source.row != 6 && M->source.row - M->dest.row > 1)
-            return ILLEGAL_MOVE_PAWN_1;
-
-        if (M->source.col - M->dest.col != 0 &&
-            (dest_piece == cpEEMPTY || dest_piece > 0))
-            return ILLEGAL_MOVE_PAWN_1;
+            ko = ko || (M->offset.row == 2 &&
+                        board_get_at(B, M->source.row - 1, M->source.col) !=
+                            cpEEMPTY);
+        }
+        else
+        {
+            /* Take over */
+            ko = ko || (M->offset.row > 1);
+            ko = ko || (dest_piece == cpEEMPTY);
+        }
     }
+
+    if (ko)
+        return ILLEGAL_MOVE_PAWN_DESC;
 
     return NULL;
 }
@@ -239,7 +259,7 @@ void move_init(move_p M, char* str, size_t n)
      * - 2, 3 for dest.
      *
      * If that position exceeds str boundary (that is str + n - 1), then the
-     * command is not vaild.
+	 * command is not vaild.
      */
     if (trim_str + 3 > str + n - 1)
     {
@@ -250,6 +270,9 @@ void move_init(move_p M, char* str, size_t n)
 
     move_init_part(trim_str, &M->source.row, &M->source.col);
     move_init_part(trim_str + 2, &M->dest.row, &M->dest.col);
+
+    M->offset.row = M->dest.row - M->source.row;
+    M->offset.col = M->dest.col - M->source.col;
 }
 
 int board_coord_out_of_bound(int r, int c)

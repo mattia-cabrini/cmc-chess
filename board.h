@@ -21,11 +21,18 @@ typedef struct move_t
         int row;
         int col;
     } source;
+
     struct
     {
         int row;
         int col;
     } dest;
+
+    struct
+    {
+        int row;
+        int col;
+    } offset;
 }* move_p;
 
 extern const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
@@ -33,11 +40,9 @@ extern const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_FROM_IS_EMPTY;
 extern const char* ILLEGAL_MOVE_FMT;
 extern const char* ILLEGAL_MOVE_NOT_YOUR_TURN;
-
-extern const char* ILLEGAL_MOVE_PAWN_DEF;
-extern const char* ILLEGAL_MOVE_PAWN_1;
-extern const char* ILLEGAL_MOVE_PAWN_FORWARD;
 extern const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+
+extern const char* ILLEGAL_MOVE_PAWN_DESC;
 
 extern piece_t board_get_at(board_p B, int row, int col);
 extern void    board_set_at(board_p B, int row, int col, piece_t p);
