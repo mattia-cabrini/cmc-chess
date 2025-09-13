@@ -39,7 +39,11 @@ const char* ILLEGAL_MOVE_PAWN_DESC =
     "pawn can only go forward:\n - By two position, if still in default "
     "position;\n - By one position, if not in default position.\n\nA pawn can "
     "only take over by one diagonal position.\n";
-const char* ILLEGAL_MOVE_ROOK_DESC = "rook can only move horizontally";
+const char* ILLEGAL_MOVE_ROOK_DESC =
+    "rook can only move horizontally or vertically without jumping pieces";
+const char* ILLEGAL_MOVE_KNIGHT_DESC =
+    "knight can only move by one vertical and two horizontal OR two vertical "
+    "and one horizontal";
 
 static void move_init_part(char* str, int* r, int* c);
 
@@ -156,7 +160,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
     source_piece = board_get_at(B, M->source.row, M->source.col);
     dest_piece   = board_get_at(B, M->dest.row, M->dest.col);
 
-    if (M->offset.col > 1 || M->offset.col < -1)
+    if (M->abs_offset.col > 1)
         return ILLEGAL_MOVE_PAWN_DESC;
 
     if (source_piece < 0)
@@ -257,9 +261,14 @@ static const char* board_is_illegal_ROOK_move(board_p B, move_p M)
 static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M)
 {
     (void)B;
-    (void)M;
 
-    return ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+    if (M->abs_offset.row == 1 && M->abs_offset.col != 2)
+        return ILLEGAL_MOVE_KNIGHT_DESC;
+
+    if (M->abs_offset.col == 1 && M->abs_offset.row != 2)
+        return ILLEGAL_MOVE_KNIGHT_DESC;
+
+    return NULL;
 }
 
 static const char* board_is_illegal_BISHOP_move(board_p B, move_p M)
@@ -319,6 +328,11 @@ void move_init(move_p M, char* str, size_t n)
 
     M->offset.row = M->dest.row - M->source.row;
     M->offset.col = M->dest.col - M->source.col;
+
+    M->abs_offset.row =
+        (unsigned int)(M->offset.row > 0 ? M->offset.row : -M->offset.row);
+    M->abs_offset.col =
+        (unsigned int)(M->offset.col > 0 ? M->offset.col : -M->offset.col);
 }
 
 int board_coord_out_of_bound(int r, int c)

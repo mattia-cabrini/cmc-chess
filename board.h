@@ -33,6 +33,12 @@ typedef struct move_t
         int row;
         int col;
     } offset;
+
+    struct
+    {
+        unsigned int row;
+        unsigned int col;
+    } abs_offset;
 }* move_p;
 
 extern const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
@@ -46,6 +52,7 @@ extern const char* ILLEGAL_MOVE_TAKE_OVER_SELF;
 
 extern const char* ILLEGAL_MOVE_PAWN_DESC;
 extern const char* ILLEGAL_MOVE_ROOK_DESC;
+extern const char* ILLEGAL_MOVE_KNIGHT_DESC;
 
 extern piece_t board_get_at(board_p B, int row, int col);
 extern void    board_set_at(board_p B, int row, int col, piece_t p);
