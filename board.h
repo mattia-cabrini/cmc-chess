@@ -42,6 +42,7 @@ extern const char* ILLEGAL_MOVE_FMT;
 extern const char* ILLEGAL_MOVE_NOT_YOUR_TURN;
 extern const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
 extern const char* ILLEGAL_MOVE_NO_MOVE;
+extern const char* ILLEGAL_MOVE_TAKE_OVER_SELF;
 
 extern const char* ILLEGAL_MOVE_PAWN_DESC;
 extern const char* ILLEGAL_MOVE_ROOK_DESC;

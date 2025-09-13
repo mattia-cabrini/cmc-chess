@@ -27,12 +27,14 @@ const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND =
     "source coordinates are out of bound";
 const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND =
     "destination coordinates are out of bound";
-const char* ILLEGAL_MOVE_FROM_IS_EMPTY       = "source is empty";
-const char* ILLEGAL_MOVE_FMT                 = "invalid format";
-const char* ILLEGAL_MOVE_NOT_YOUR_TURN       = "not your turn";
-const char* ILLEGAL_MOVE_NO_MOVE             = "not a move";
-
+const char* ILLEGAL_MOVE_FROM_IS_EMPTY = "source is empty";
+const char* ILLEGAL_MOVE_FMT           = "invalid format";
+const char* ILLEGAL_MOVE_NOT_YOUR_TURN = "not your turn";
+const char* ILLEGAL_MOVE_NO_MOVE       = "not a move";
+const char* ILLEGAL_MOVE_TAKE_OVER_SELF =
+    "do you want to take over your own pieces? Crazy";
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
+
 const char* ILLEGAL_MOVE_PAWN_DESC =
     "pawn can only go forward:\n - By two position, if still in default "
     "position;\n - By one position, if not in default position.\n\nA pawn can "
@@ -91,6 +93,7 @@ void board_print(board_p B)
 const char* board_check_move(board_p B, move_p M, turn_t turn)
 {
     piece_t source;
+    piece_t dest;
 
     if (M->source.row == -1)
         return ILLEGAL_MOVE_FMT;
@@ -112,6 +115,12 @@ const char* board_check_move(board_p B, move_p M, turn_t turn)
     /* True is source and turn does not have the same sign bit */
     if ((source ^ turn) < 0)
         return ILLEGAL_MOVE_NOT_YOUR_TURN;
+
+    dest = board_get_at(B, M->dest.row, M->dest.col);
+
+    /* True if dest is not empty and does have the same sign bit as source */
+    if (dest != cpEEMPTY && (source ^ dest) > 0)
+        return ILLEGAL_MOVE_TAKE_OVER_SELF;
 
     switch (source)
     {
