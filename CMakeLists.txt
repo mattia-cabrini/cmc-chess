@@ -7,13 +7,21 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
+find_program(CLANG_FORMAT_EXECUTABLE NAMES clang-format)
+if (NOT CLANG_FORMAT_EXECUTABLE)
+  message(FATAL_ERROR "clang-format not found.")
+endif()
+
 string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 
 set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS_DEBUG "")
 
 set(SRC main.c piece.c board.c)
-set(H "")
+set(H piece.h board.h int.h)
+
+set(FILES_FMT ${SRC} ${H})
+set(FMT_CONFIG "clang-format")
 
 add_executable(cmc-chess ${SRC})
 
@@ -130,3 +138,17 @@ elseif (build_type STREQUAL debug)
 	target_compile_options(cmc-chess PRIVATE -O0 -g -DDEBUG)
 endif()
 
+set(FORMAT_STAMP ${CMAKE_CURRENT_BINARY_DIR}/.format-stamp)
+
+add_custom_command(
+	OUTPUT ${FORMAT_STAMP}
+	COMMAND ${CMAKE_COMMAND} -E echo "==> clang-format on all .c and .h"
+	COMMAND ${CLANG_FORMAT_EXECUTABLE} -i -style=file:${FMT_CONFIG} ${FILES_FMT}
+	COMMAND ${CMAKE_COMMAND} -E touch ${FORMAT_STAMP}
+	DEPENDS ${FILES_FMT}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	VERBATIM
+)
+
+add_custom_target(fmt DEPENDS ${FORMAT_STAMP})
+add_dependencies(cmc-chess fmt)

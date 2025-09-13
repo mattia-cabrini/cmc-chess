@@ -36,7 +36,7 @@ const char* ILLEGAL_MOVE_PAWN_DEF =
     "by one diagonal position";
 const char* ILLEGAL_MOVE_PAWN_1 = "pawn can only move forward by one row or "
                                   "take over by one diagonal position";
-const char* ILLEGAL_MOVE_PAWN_FORWARD = "pawn can only move forward";
+const char* ILLEGAL_MOVE_PAWN_FORWARD        = "pawn can only move forward";
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
 
 static void move_init_part(char* str, int* r, int* c);
@@ -109,7 +109,6 @@ const char* board_check_move(board_p B, move_p M, turn_t turn)
     /* True is source and turn does not have the same sign bit */
     if ((source ^ turn) < 0)
         return ILLEGAL_MOVE_NOT_YOUR_TURN;
-
 
     switch (source)
     {
