@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
 #include "board.h"
+#include "int.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -28,6 +29,7 @@ const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND =
     "destination coordinates are out of bound";
 const char* ILLEGAL_MOVE_FROM_IS_EMPTY = "source is empty";
 const char* ILLEGAL_MOVE_FMT           = "invalid format";
+const char* ILLEGAL_MOVE_NOT_YOUR_TURN = "not your turn";
 
 const char* ILLEGAL_MOVE_PAWN_DEF =
     "pawn in default position can only move forward by two rows or take over "
@@ -35,8 +37,6 @@ const char* ILLEGAL_MOVE_PAWN_DEF =
 const char* ILLEGAL_MOVE_PAWN_1 = "pawn can only move forward by one row or "
                                   "take over by one diagonal position";
 const char* ILLEGAL_MOVE_PAWN_FORWARD = "pawn can only move forward";
-const char* ILLEGAL_MOVE_PAWN_TAKE =
-    "pawn can only take over by one diagonal position";
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
 
 static void move_init_part(char* str, int* r, int* c);
@@ -88,8 +88,10 @@ void board_print(board_p B)
     printf("\n\n");
 }
 
-const char* board_check_move(board_p B, move_p M)
+const char* board_check_move(board_p B, move_p M, turn_t turn)
 {
+    piece_t source;
+
     if (M->source.row == -1)
         return ILLEGAL_MOVE_FMT;
 
@@ -102,7 +104,14 @@ const char* board_check_move(board_p B, move_p M)
     if (board_get_at(B, M->source.row, M->source.col) == cpEEMPTY)
         return ILLEGAL_MOVE_FROM_IS_EMPTY;
 
-    switch (board_get_at(B, M->source.row, M->source.col))
+    source = board_get_at(B, M->source.row, M->source.col);
+
+    /* True is source and turn does not have the same sign bit */
+    if ((source ^ turn) < 0)
+        return ILLEGAL_MOVE_NOT_YOUR_TURN;
+
+
+    switch (source)
     {
     case cpBPAWN:
     case cpWPAWN:
@@ -151,7 +160,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
         if (M->source.col - M->dest.col != 0 &&
             (dest_piece == cpEEMPTY || dest_piece < 0))
-            return ILLEGAL_MOVE_PAWN_TAKE;
+            return ILLEGAL_MOVE_PAWN_1;
     }
     else
     {
@@ -166,7 +175,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
         if (M->source.col - M->dest.col != 0 &&
             (dest_piece == cpEEMPTY || dest_piece > 0))
-            return ILLEGAL_MOVE_PAWN_TAKE;
+            return ILLEGAL_MOVE_PAWN_1;
     }
 
     return NULL;
@@ -270,9 +279,9 @@ static const char* board_colour(int row, int col)
     col &= 1;
 
     if (row == col)
-		/* Reset; Bold; Foreground Black; Background White */
+        /* Reset; Bold; Foreground Black; Background White */
         return "\x1b[0;1;30;47m";
     else
-		/* Reset; Bold; Foreground White; Background Black */
+        /* Reset; Bold; Foreground White; Background Black */
         return "\x1b[0;1;40;37m";
 }

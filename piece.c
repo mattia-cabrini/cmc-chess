@@ -3,6 +3,9 @@
 
 #include "piece.h"
 
+const turn_t cpWTURN = 0x1;
+const turn_t cpBTURN = ~0x1;
+
 const char* cpWHITES = ".PRNBQK";
 const char* cpBLACKS = ".prnbqk";
 

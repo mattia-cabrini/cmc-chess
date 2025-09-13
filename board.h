@@ -6,6 +6,7 @@
 
 #include <stddef.h>
 
+#include "int.h"
 #include "piece.h"
 
 typedef struct board_t
@@ -31,10 +32,11 @@ extern const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_FROM_IS_EMPTY;
 extern const char* ILLEGAL_MOVE_FMT;
+extern const char* ILLEGAL_MOVE_NOT_YOUR_TURN;
+
 extern const char* ILLEGAL_MOVE_PAWN_DEF;
 extern const char* ILLEGAL_MOVE_PAWN_1;
 extern const char* ILLEGAL_MOVE_PAWN_FORWARD;
-extern const char* ILLEGAL_MOVE_PAWN_TAKE;
 extern const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
 
 extern piece_t board_get_at(board_p B, int row, int col);
@@ -42,7 +44,7 @@ extern void    board_set_at(board_p B, int row, int col, piece_t p);
 extern void    board_init(board_p B);
 extern void    board_print(board_p B);
 
-extern const char* board_check_move(board_p B, move_p M);
+extern const char* board_check_move(board_p B, move_p M, turn_t turn);
 
 /**
  * Unsafe

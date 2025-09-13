@@ -4,18 +4,10 @@
 #ifndef CMC_CHESS_PIECE_H
 #define CMC_CHESS_PIECE_H
 
-#include <limits.h>
+#include "int.h"
 
-/* C89 does not provide [u]intN_t types */
-#ifndef int8_t
-#if CHAR_BIT == 8
-typedef char piece_t;
-#else
-#error "No suitable 8 bit data type"
-#endif
-#else
-typedef int8_t piece_t;
-#endif
+typedef int8_t  piece_t;
+typedef piece_t turn_t;
 
 /* Using defines bacause const cannot be used in array static initialization */
 #define cpEEMPTY ((piece_t)0)
@@ -31,6 +23,10 @@ typedef int8_t piece_t;
 #define cpBBISHOP ((piece_t)(-4))
 #define cpBQUEEN ((piece_t)(-5))
 #define cpBKING ((piece_t)(-6))
+
+/* cpWTURN is always equal to ~cpBTURN */
+extern const turn_t cpWTURN;
+extern const turn_t cpBTURN;
 
 extern const char* cpWHITES;
 extern const char* cpBLACKS;
