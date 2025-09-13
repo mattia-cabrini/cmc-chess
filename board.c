@@ -226,43 +226,47 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
 static const char* board_is_illegal_ROOK_move(board_p B, move_p M)
 {
-    struct coord_t ctmp;
+    struct coord_t ctmp; /* Coord to iterate on */
+    int* coord_cur; /* Coord cursor; When iterating on the board using ctmp, one
+                       coordinate is constant (col or row) and the other one is
+                       variable. This is a pointer to the latter  */
+    int incr;       /* 1 is the move goes up, -1 if goes down */
+    int actual_offset; /* The value of the actual offset */
+    int move_bound;    /* Index of destination row or col */
 
-    /* Moving both horizontally and vertically */
+    /* Moving both horizontally and vertically
+     * No need to check if both are zero because it would be a non-move
+     */
     if (M->offset.row != 0 && M->offset.col != 0)
         return ILLEGAL_MOVE_ROOK_DESC;
 
-    if (M->offset.col > 0)
+    if (M->offset.col != 0)
     {
-        ctmp.row = M->source.row;
-        for (ctmp.col = M->source.col + 1; ctmp.col < M->dest.col; ++ctmp.col)
-            if (board_get_at(B, &ctmp) != cpEEMPTY)
-                /* Trying to jump a piece */
-                return ILLEGAL_MOVE_ROOK_DESC;
+        ctmp.row      = M->source.row;
+        incr          = M->offset.col > 0 ? 1 : -1;
+        coord_cur     = &ctmp.col;
+        *coord_cur    = M->source.col;
+        actual_offset = M->offset.col;
+        move_bound    = M->dest.col;
     }
-    else if (M->offset.col < 0)
+    else
     {
-        ctmp.row = M->source.row;
-        for (ctmp.col = M->source.col - 1; ctmp.col > M->dest.col; --ctmp.col)
-            if (board_get_at(B, &ctmp) != cpEEMPTY)
-                /* Trying to jump a piece */
-                return ILLEGAL_MOVE_ROOK_DESC;
+        ctmp.col      = M->source.col;
+        incr          = M->offset.row > 0 ? 1 : -1;
+        coord_cur     = &ctmp.row;
+        *coord_cur    = M->source.row;
+        actual_offset = M->offset.row;
+        move_bound    = M->dest.row;
     }
-    else if (M->offset.row > 0)
+
+    *coord_cur += incr;
+    while ((actual_offset > 0 && *coord_cur < move_bound) ||
+           (actual_offset < 0 && *coord_cur > move_bound))
     {
-        ctmp.col = M->source.col;
-        for (ctmp.row = M->source.row + 1; ctmp.row < M->dest.row; ++ctmp.row)
-            if (board_get_at(B, &ctmp) != cpEEMPTY)
-                /* Trying to jump a piece */
-                return ILLEGAL_MOVE_ROOK_DESC;
-    }
-    else if (M->offset.row < 0)
-    {
-        ctmp.col = M->source.col;
-        for (ctmp.row = M->source.row - 1; ctmp.row > M->dest.row; --ctmp.row)
-            if (board_get_at(B, &ctmp) != cpEEMPTY)
-                /* Trying to jump a piece */
-                return ILLEGAL_MOVE_ROOK_DESC;
+        if (board_get_at(B, &ctmp) != cpEEMPTY)
+            /* Trying to jump a piece */
+            return ILLEGAL_MOVE_ROOK_DESC;
+        *coord_cur += incr;
     }
 
     return NULL;
