@@ -54,7 +54,12 @@ dkms.conf
 # debug information files
 *.dwo
 
+# Build directories and CMake cache
 build*
 CMakeCache.txt
 
+# Generic files
 ignore
+
+# Backup files for documents (autogen during spell check)
+docs/*.bak

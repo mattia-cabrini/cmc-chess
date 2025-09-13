@@ -18,20 +18,20 @@ void read_command(char* comm, size_t n);
 
 int main(int argc, char** argv)
 {
-    struct chess_board_t board;
-    char                 comm[16];
-    const char*          illegal_move;
-    struct move_t        m;
+    struct board_t board;
+    char           comm[16];
+    const char*    illegal_move;
+    struct move_t  move;
 
     (void)argc;
     (void)argv;
 
-    chess_board_init(&board);
+    board_init(&board);
 
     for (;;)
     {
         /* clear(); */
-        chess_board_print(&board);
+        board_print(&board);
 
         for (comm[0] = 0; strlen(comm) < 4;)
         {
@@ -42,9 +42,9 @@ int main(int argc, char** argv)
             if (strlen(comm) < 4)
                 printf("???\n");
 
-            move_init(comm, &m);
+            move_init(&move, comm);
 
-            illegal_move = chess_board_check_move(&board, &m);
+            illegal_move = board_check_move(&board, &move);
             if (illegal_move != NULL)
             {
                 printf("Illegal move: %s\n", illegal_move);
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                chess_board_exec(&board, &m);
+                board_exec(&board, &move);
             }
         }
     }

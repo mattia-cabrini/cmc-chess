@@ -6,7 +6,7 @@
 const char* cpWHITES = ".PRNBQK";
 const char* cpBLACKS = ".prnbqk";
 
-char chess_piece_to_char(chess_piece_t p)
+char piece_to_char(piece_t p)
 {
     int pint = (int)p;
 
