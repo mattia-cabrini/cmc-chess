@@ -42,7 +42,7 @@ int main(int argc, char** argv)
             if (strlen(comm) < 4)
                 printf("???\n");
 
-            move_init(&move, comm);
+            move_init(&move, comm, sizeof(comm));
 
             illegal_move = board_check_move(&board, &move);
             if (illegal_move != NULL)
@@ -89,6 +89,7 @@ void read_command(char* comm, size_t n)
 {
     size_t len;
 
+	/* Does not take into account the terminal buffer */
     fflush(stdin);
     comm = fgets(comm, (int)n, stdin);
 

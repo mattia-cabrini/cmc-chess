@@ -4,6 +4,8 @@
 #ifndef CMC_CHESS_BOARD_H
 #define CMC_CHESS_BOARD_H
 
+#include <stddef.h>
+
 #include "piece.h"
 
 typedef struct board_t
@@ -28,6 +30,7 @@ typedef struct move_t
 extern const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_FROM_IS_EMPTY;
+extern const char* ILLEGAL_MOVE_FMT;
 extern const char* ILLEGAL_MOVE_PAWN_DEF;
 extern const char* ILLEGAL_MOVE_PAWN_1;
 extern const char* ILLEGAL_MOVE_PAWN_FORWARD;
@@ -59,7 +62,7 @@ extern void board_exec(board_p B, move_p M);
  * NULL -> Legal move
  * *    -> ILLEGAL_MOVE_*
  */
-extern void move_init(move_p M, char* str);
+extern void move_init(move_p M, char* str, size_t n);
 extern int  board_coord_out_of_bound(int r, int c);
 
 #endif /* CMC_CHESS_BOARD_H */

@@ -3,6 +3,7 @@
 
 #include "board.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -26,6 +27,7 @@ const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND =
 const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND =
     "destination coordinates are out of bound";
 const char* ILLEGAL_MOVE_FROM_IS_EMPTY = "source is empty";
+const char* ILLEGAL_MOVE_FMT           = "invalid format";
 
 const char* ILLEGAL_MOVE_PAWN_DEF =
     "pawn in default position can only move forward by two rows or take over "
@@ -86,6 +88,9 @@ void board_print(board_p B)
 
 const char* board_check_move(board_p B, move_p M)
 {
+    if (M->source.row == -1)
+        return ILLEGAL_MOVE_FMT;
+
     if (board_coord_out_of_bound(M->source.row, M->source.col))
         return ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
 
@@ -211,10 +216,30 @@ static void move_init_part(char* str, int* r, int* c)
     *r = str[1] - '0' - 1;
 }
 
-void move_init(move_p M, char* str)
+void move_init(move_p M, char* str, size_t n)
 {
-    move_init_part(str, &M->source.row, &M->source.col);
-    move_init_part(str + 2, &M->dest.row, &M->dest.col);
+    char* trim_str = str;
+
+    if (n >= 4)
+        for (trim_str = str; *trim_str == ' '; ++trim_str)
+            ;
+
+    /* trim_str + 3 is the last position that should be read to init M:
+     * - 0, 1 for source;
+     * - 2, 3 for dest.
+     *
+     * If that position exceeds str boundary (that is str + n - 1), then the
+     * command is not vaild.
+     */
+    if (trim_str + 3 > str + n - 1)
+    {
+        M->source.row = M->source.col = -1;
+        M->dest.row = M->dest.col = -1;
+        return;
+    }
+
+    move_init_part(trim_str, &M->source.row, &M->source.col);
+    move_init_part(trim_str + 2, &M->dest.row, &M->dest.col);
 }
 
 int board_coord_out_of_bound(int r, int c)
