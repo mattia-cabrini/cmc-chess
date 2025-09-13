@@ -46,6 +46,7 @@ extern const char* ILLEGAL_MOVE_TAKE_OVER_SELF;
 extern const char* ILLEGAL_MOVE_PAWN_DESC;
 extern const char* ILLEGAL_MOVE_ROOK_DESC;
 extern const char* ILLEGAL_MOVE_KNIGHT_DESC;
+extern const char* ILLEGAL_MOVE_BISHOP_DESC;
 
 extern piece_t board_get_at(board_p B, coord_p C);
 extern void    board_set_at(board_p B, coord_p C, piece_t p);

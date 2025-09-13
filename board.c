@@ -44,6 +44,8 @@ const char* ILLEGAL_MOVE_ROOK_DESC =
 const char* ILLEGAL_MOVE_KNIGHT_DESC =
     "knight can only move by one vertical and two horizontal OR two vertical "
     "and one horizontal";
+const char* ILLEGAL_MOVE_BISHOP_DESC =
+    "bishop can only move on a diagonal line, without jumping pieces";
 
 static void move_init_part(const char* str, coord_p C);
 
@@ -296,10 +298,33 @@ static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M)
 
 static const char* board_is_illegal_BISHOP_move(board_p B, move_p M)
 {
-    (void)B;
-    (void)M;
+    struct coord_t ctmp;   /* Coord to iterate on */
+    int            incr_r; /* Increment on row (1 or -1, based on M) */
+    int            incr_c; /* Increment on col (1 or -1, based on M) */
 
-    return ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+    if (M->abs_offset.row != M->abs_offset.col)
+        return ILLEGAL_MOVE_BISHOP_DESC;
+
+    incr_r = M->offset.row > 0 ? 1 : -1;
+    incr_c = M->offset.col > 0 ? 1 : -1;
+    ctmp   = M->source;
+
+    ctmp.row += incr_r;
+    ctmp.col += incr_c;
+
+    /* The condition could be based both on row and col, but since row and col
+     * get incremented together, there is no point in checking both */
+    while ((incr_r > 0 && ctmp.row < M->dest.row) ||
+           (incr_r < 0 && ctmp.row > M->dest.row))
+    {
+        if (board_get_at(B, &ctmp) != cpEEMPTY)
+            return ILLEGAL_MOVE_BISHOP_DESC;
+
+        ctmp.row += incr_r;
+        ctmp.col += incr_c;
+    }
+
+    return NULL;
 }
 
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M)
