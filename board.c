@@ -276,6 +276,15 @@ static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M)
 {
     (void)B;
 
+    if (M->abs_offset.row > 2 || M->abs_offset.row == 0)
+        return ILLEGAL_MOVE_KNIGHT_DESC;
+
+    if (M->abs_offset.col > 2 || M->abs_offset.col == 0)
+        return ILLEGAL_MOVE_KNIGHT_DESC;
+
+    if (M->abs_offset.row == 2 && M->abs_offset.col == 2)
+        return ILLEGAL_MOVE_KNIGHT_DESC;
+
     if (M->abs_offset.row == 1 && M->abs_offset.col != 2)
         return ILLEGAL_MOVE_KNIGHT_DESC;
 
