@@ -30,12 +30,14 @@ const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND =
 const char* ILLEGAL_MOVE_FROM_IS_EMPTY       = "source is empty";
 const char* ILLEGAL_MOVE_FMT                 = "invalid format";
 const char* ILLEGAL_MOVE_NOT_YOUR_TURN       = "not your turn";
+const char* ILLEGAL_MOVE_NO_MOVE             = "not a move";
 
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
 const char* ILLEGAL_MOVE_PAWN_DESC =
     "pawn can only go forward:\n - By two position, if still in default "
     "position;\n - By one position, if not in default position.\n\nA pawn can "
     "only take over by one diagonal position.\n";
+const char* ILLEGAL_MOVE_ROOK_DESC = "rook can only move horizontally";
 
 static void move_init_part(char* str, int* r, int* c);
 
@@ -92,6 +94,9 @@ const char* board_check_move(board_p B, move_p M, turn_t turn)
 
     if (M->source.row == -1)
         return ILLEGAL_MOVE_FMT;
+
+    if (M->offset.row == 0 && M->offset.col == 0)
+        return ILLEGAL_MOVE_NO_MOVE;
 
     if (board_coord_out_of_bound(M->source.row, M->source.col))
         return ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
@@ -202,10 +207,42 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
 static const char* board_is_illegal_ROOK_move(board_p B, move_p M)
 {
-    (void)B;
-    (void)M;
+    int cur;
 
-    return ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+    /* Moving both horizontally and vertically */
+    if (M->offset.row != 0 && M->offset.col != 0)
+        return ILLEGAL_MOVE_ROOK_DESC;
+
+    if (M->offset.col > 0)
+    {
+        for (cur = M->source.col + 1; cur < M->dest.col; ++cur)
+            if (board_get_at(B, M->source.row, cur) != cpEEMPTY)
+                /* Trying to jump a piece */
+                return ILLEGAL_MOVE_ROOK_DESC;
+    }
+    else if (M->offset.col < 0)
+    {
+        for (cur = M->source.col - 1; cur > M->dest.col; --cur)
+            if (board_get_at(B, M->source.row, cur) != cpEEMPTY)
+                /* Trying to jump a piece */
+                return ILLEGAL_MOVE_ROOK_DESC;
+    }
+    else if (M->offset.row > 0)
+    {
+        for (cur = M->source.row + 1; cur < M->dest.row; ++cur)
+            if (board_get_at(B, cur, M->source.col) != cpEEMPTY)
+                /* Trying to jump a piece */
+                return ILLEGAL_MOVE_ROOK_DESC;
+    }
+    else if (M->offset.row < 0)
+    {
+        for (cur = M->source.row - 1; cur > M->dest.row; --cur)
+            if (board_get_at(B, cur, M->source.col) != cpEEMPTY)
+                /* Trying to jump a piece */
+                return ILLEGAL_MOVE_ROOK_DESC;
+    }
+
+    return NULL;
 }
 
 static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M)
@@ -259,7 +296,7 @@ void move_init(move_p M, char* str, size_t n)
      * - 2, 3 for dest.
      *
      * If that position exceeds str boundary (that is str + n - 1), then the
-	 * command is not vaild.
+     * command is not vaild.
      */
     if (trim_str + 3 > str + n - 1)
     {

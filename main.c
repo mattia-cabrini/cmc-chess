@@ -85,7 +85,7 @@ int streq_ci(const char* str1, const char* str2)
         ++str2;
     }
 
-    return 1;
+    return *str1 == *str2;
 }
 
 void read_command(char* comm, size_t n)

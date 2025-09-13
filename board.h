@@ -41,8 +41,10 @@ extern const char* ILLEGAL_MOVE_FROM_IS_EMPTY;
 extern const char* ILLEGAL_MOVE_FMT;
 extern const char* ILLEGAL_MOVE_NOT_YOUR_TURN;
 extern const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+extern const char* ILLEGAL_MOVE_NO_MOVE;
 
 extern const char* ILLEGAL_MOVE_PAWN_DESC;
+extern const char* ILLEGAL_MOVE_ROOK_DESC;
 
 extern piece_t board_get_at(board_p B, int row, int col);
 extern void    board_set_at(board_p B, int row, int col, piece_t p);
