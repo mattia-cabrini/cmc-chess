@@ -17,8 +17,8 @@ string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS_DEBUG "")
 
-set(SRC main.c piece.c board.c)
-set(H piece.h board.h int.h)
+set(SRC main.c piece.c board.c game.c util.c)
+set(H piece.h board.h int.h game.h util.h)
 
 set(FILES_FMT ${SRC} ${H})
 set(FMT_CONFIG "clang-format")
