@@ -10,7 +10,8 @@
 #ifndef int8_t
 
 #if CHAR_BIT == 8
-typedef char myint8_t;
+typedef char          myint8_t;
+typedef unsigned char myuint8_t;
 #else
 #error "No suitable 8 bit data type"
 #endif

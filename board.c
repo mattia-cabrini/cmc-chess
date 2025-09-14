@@ -34,6 +34,8 @@ const char* ILLEGAL_MOVE_NO_MOVE       = "not a move";
 const char* ILLEGAL_MOVE_TAKE_OVER_SELF =
     "do you want to take over your own pieces? Crazy";
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
+const char* ILLEGAL_MOVE_CHECK =
+    "cannot move! Do you want to get under check? Crazy";
 
 const char* ILLEGAL_MOVE_PAWN_DESC =
     "pawn can only go forward:\n - By two position, if still in default "
@@ -53,6 +55,7 @@ const char* ILLEGAL_MOVE_KING_DESC =
     "King can only move one position and cannot take over";
 
 static void move_init_part(const char* str, coord_p C);
+static void move_set_offset(move_p M);
 
 static const char* board_is_illegal_PAWN_move(board_p B, move_p M);
 static const char* board_is_illegal_ROOK_move(board_p B, move_p M);
@@ -60,6 +63,10 @@ static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M);
 static const char* board_is_illegal_BISHOP_move(board_p B, move_p M);
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M);
 static const char* board_is_illegal_KING_move(board_p B, move_p M);
+
+static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
+
+static int coord_eq(coord_p A, coord_p B);
 
 static const char* board_colour(coord_p C);
 
@@ -76,6 +83,11 @@ void board_set_at(board_p B, coord_p C, piece_t p)
 void board_init(board_p B)
 {
     memcpy(B->board, DEFAULT_BOARD, sizeof(DEFAULT_BOARD));
+
+    B->wking.row = 7;
+    B->wking.col = 3;
+    B->bking.row = 0;
+    B->bking.col = 3;
 }
 
 void board_print(board_p B)
@@ -100,7 +112,7 @@ void board_print(board_p B)
     printf("\n\n");
 }
 
-const char* board_check_move(board_p B, move_p M, turn_t turn)
+static const char* board_check_move_direction(board_p B, move_p M, turn_t turn)
 {
     piece_t source;
     piece_t dest;
@@ -157,6 +169,66 @@ const char* board_check_move(board_p B, move_p M, turn_t turn)
     return NULL;
 }
 
+const char* board_check_move(board_p B, move_p M, turn_t turn, coord_p whence)
+{
+    const char*    err_direction;
+    piece_t        o_src;
+    piece_t        o_dst;
+    struct coord_t o_wking;
+    struct coord_t o_bking;
+
+    /* Check direction and fail */
+    err_direction = board_check_move_direction(B, M, turn);
+    if (err_direction != NULL)
+        return err_direction;
+
+    /* Save the original pieces and simulate execution */
+    o_src = board_get_at(B, &M->source);
+    o_dst = board_get_at(B, &M->dest);
+
+    board_set_at(B, &M->source, cpEEMPTY);
+    board_set_at(B, &M->dest, o_src);
+
+    /* If it is turn white, update position for W king and check for check
+     * ...           black  ...                 B ...
+     *
+     * Then restore W or B king position.
+     * Whence is set to -1, -1 in order to determine if a check is detected.
+     */
+
+    whence->row = whence->col = -1;
+    if (turn > 0)
+    {
+        o_wking = B->wking;
+        if (o_src == cpWKING)
+            B->wking = M->dest;
+
+        board_under_check_part(B, &B->wking, whence);
+
+        B->wking = o_wking;
+    }
+    else
+    {
+        o_bking = B->bking;
+        if (o_src == cpBKING)
+            B->bking = M->dest;
+
+        board_under_check_part(B, &B->bking, whence);
+
+        B->bking = o_bking;
+    }
+
+    /* Restore the board */
+    board_set_at(B, &M->source, o_src);
+    board_set_at(B, &M->dest, o_dst);
+
+    /* If whence is changed a check has been detected */
+    if (whence->row != -1)
+        return ILLEGAL_MOVE_CHECK;
+
+    return NULL;
+}
+
 static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 {
     int            ko = 0;
@@ -185,7 +257,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
             if (!ko && M->offset.row == 2)
             {
-                tmp.row = M->source.row + 1;
+                tmp.row = (myint8_t)(M->source.row + 1);
                 tmp.col = M->source.col;
                 ko      = (board_get_at(B, &tmp) != cpEEMPTY);
             }
@@ -193,7 +265,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
         else
         {
             /* Take over */
-            ko = ko || (M->offset.row > 1);
+            ko = ko || (M->abs_offset.row > 1);
             ko = ko || (dest_piece == cpEEMPTY);
         }
     }
@@ -212,7 +284,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 
             if (!ko && M->offset.row == -2)
             {
-                tmp.row = M->source.row - 1;
+                tmp.row = (myint8_t)(M->source.row - 1);
                 tmp.col = M->source.col;
                 ko      = (board_get_at(B, &tmp) != cpEEMPTY);
             }
@@ -220,7 +292,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
         else
         {
             /* Take over */
-            ko = ko || (M->offset.row > 1);
+            ko = ko || (M->abs_offset.row > 1);
             ko = ko || (dest_piece == cpEEMPTY);
         }
     }
@@ -234,12 +306,13 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
 static const char* board_is_illegal_ROOK_move(board_p B, move_p M)
 {
     struct coord_t ctmp; /* Coord to iterate on */
-    int* coord_cur; /* Coord cursor; When iterating on the board using ctmp, one
-                       coordinate is constant (col or row) and the other one is
-                       variable. This is a pointer to the latter  */
-    int incr;       /* 1 is the move goes up, -1 if goes down */
-    int actual_offset; /* The value of the actual offset */
-    int move_bound;    /* Index of destination row or col */
+    myint8_t*
+        coord_cur; /* Coord cursor; When iterating on the board using ctmp, one
+                      coordinate is constant (col or row) and the other one is
+                      variable. This is a pointer to the latter */
+    myint8_t incr; /* 1 is the move goes up, -1 if goes down */
+    myint8_t actual_offset; /* The value of the actual offset */
+    myint8_t move_bound;    /* Index of destination row or col */
 
     /* Moving both horizontally and vertically
      * No need to check if both are zero because it would be a non-move
@@ -266,14 +339,14 @@ static const char* board_is_illegal_ROOK_move(board_p B, move_p M)
         move_bound    = M->dest.row;
     }
 
-    *coord_cur += incr;
+    *coord_cur = (myint8_t)(*coord_cur + incr);
     while ((actual_offset > 0 && *coord_cur < move_bound) ||
            (actual_offset < 0 && *coord_cur > move_bound))
     {
         if (board_get_at(B, &ctmp) != cpEEMPTY)
             /* Trying to jump a piece */
             return ILLEGAL_MOVE_ROOK_DESC;
-        *coord_cur += incr;
+        *coord_cur = (myint8_t)(*coord_cur + incr);
     }
 
     return NULL;
@@ -310,12 +383,12 @@ static const char* board_is_illegal_BISHOP_move(board_p B, move_p M)
     if (M->abs_offset.row != M->abs_offset.col)
         return ILLEGAL_MOVE_BISHOP_DESC;
 
-    incr_r = M->offset.row > 0 ? 1 : -1;
-    incr_c = M->offset.col > 0 ? 1 : -1;
-    ctmp   = M->source;
+    incr_r   = M->offset.row > 0 ? 1 : -1;
+    incr_c   = M->offset.col > 0 ? 1 : -1;
+    ctmp     = M->source;
 
-    ctmp.row += incr_r;
-    ctmp.col += incr_c;
+    ctmp.row = (myint8_t)(ctmp.row + incr_r);
+    ctmp.col = (myint8_t)(ctmp.col + incr_c);
 
     /* The condition could be based both on row and col, but since row and col
      * get incremented together, there is no point in checking both */
@@ -325,8 +398,8 @@ static const char* board_is_illegal_BISHOP_move(board_p B, move_p M)
         if (board_get_at(B, &ctmp) != cpEEMPTY)
             return ILLEGAL_MOVE_BISHOP_DESC;
 
-        ctmp.row += incr_r;
-        ctmp.col += incr_c;
+        ctmp.row = (myint8_t)(ctmp.row + incr_r);
+        ctmp.col = (myint8_t)(ctmp.col + incr_c);
     }
 
     return NULL;
@@ -363,8 +436,19 @@ static const char* board_is_illegal_KING_move(board_p B, move_p M)
 
 static void move_init_part(const char* str, coord_p C)
 {
-    C->col = (str[0] & TO_UPPER_MASK) - 'A';
-    C->row = str[1] - '0' - 1;
+    C->col = (myint8_t)((str[0] & TO_UPPER_MASK) - 'A');
+    C->row = (myint8_t)(str[1] - '0' - 1);
+}
+
+static void move_set_offset(move_p M)
+{
+    M->offset.row = (myint8_t)(M->dest.row - M->source.row);
+    M->offset.col = (myint8_t)(M->dest.col - M->source.col);
+
+    M->abs_offset.row =
+        (myuint8_t)(M->offset.row > 0 ? M->offset.row : -M->offset.row);
+    M->abs_offset.col =
+        (myuint8_t)(M->offset.col > 0 ? M->offset.col : -M->offset.col);
 }
 
 void move_init(move_p M, const char* str, size_t n)
@@ -392,13 +476,7 @@ void move_init(move_p M, const char* str, size_t n)
     move_init_part(trim_str, &M->source);
     move_init_part(trim_str + 2, &M->dest);
 
-    M->offset.row = M->dest.row - M->source.row;
-    M->offset.col = M->dest.col - M->source.col;
-
-    M->abs_offset.row =
-        (unsigned int)(M->offset.row > 0 ? M->offset.row : -M->offset.row);
-    M->abs_offset.col =
-        (unsigned int)(M->offset.col > 0 ? M->offset.col : -M->offset.col);
+    move_set_offset(M);
 }
 
 int board_coord_out_of_bound(coord_p C)
@@ -418,6 +496,12 @@ void board_exec(board_p B, move_p M)
     tmp = board_get_at(B, &M->source);
     board_set_at(B, &M->source, cpEEMPTY);
     board_set_at(B, &M->dest, tmp);
+
+    if (tmp == cpWKING)
+        B->wking = M->dest;
+
+    if (tmp == cpBKING)
+        B->bking = M->dest;
 }
 
 static const char* board_colour(coord_p C)
@@ -432,4 +516,57 @@ static const char* board_colour(coord_p C)
     else
         /* Reset; Bold; Foreground White; Background Black */
         return "\x1b[0;1;40;37m";
+}
+
+void board_under_check_part(board_p B, coord_p king, coord_p whence)
+{
+    struct move_t mtmp;
+    const char*   is_illegal_move;
+    piece_t       src;
+    piece_t       dst;
+
+    mtmp.dest = *king;
+    dst       = board_get_at(B, king);
+
+    for (mtmp.source.row = 0; mtmp.source.row < 8; ++mtmp.source.row)
+        for (mtmp.source.col = 0; mtmp.source.col < 8; ++mtmp.source.col)
+        {
+            /* Not a move */
+            if (coord_eq(&mtmp.source, king))
+                continue;
+
+            /* Dest empty or same player */
+            src = board_get_at(B, &mtmp.source);
+            if (src == cpEEMPTY || (src ^ dst) > 0)
+                continue;
+
+            move_set_offset(&mtmp);
+
+            is_illegal_move = board_check_move_direction(B, &mtmp, (turn_t)src);
+            if (is_illegal_move == NULL)
+            {
+                *whence = mtmp.source;
+                return;
+            }
+        }
+}
+
+void coord_to_str(coord_p C, char* buf, size_t n)
+{
+    if (n < 2)
+        return;
+
+    if (board_coord_out_of_bound(C))
+    {
+        buf[0] = '#';
+        buf[1] = '#';
+        return;
+    }
+
+    sprintf(buf, "%c%d", 'A' + C->col, C->row + 1);
+}
+
+static int coord_eq(coord_p A, coord_p B)
+{
+    return A->row == B->row && A->col == B->col;
 }

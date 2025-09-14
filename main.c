@@ -21,9 +21,11 @@ int main(int argc, char** argv)
 {
     struct board_t board;
     char           comm[16];
+    char           buf[16];
     const char*    illegal_move;
     struct move_t  move;
     turn_t         turn = cpWTURN;
+    struct coord_t whence_check;
 
     (void)argc;
     (void)argv;
@@ -46,7 +48,7 @@ int main(int argc, char** argv)
 
             move_init(&move, comm, sizeof(comm));
 
-            illegal_move = board_check_move(&board, &move, turn);
+            illegal_move = board_check_move(&board, &move, turn, &whence_check);
             if (illegal_move != NULL)
             {
                 printf("Illegal move: %s\n", illegal_move);
@@ -56,6 +58,12 @@ int main(int argc, char** argv)
             {
                 board_exec(&board, &move);
                 turn = (turn_t)~turn;
+            }
+
+            if (illegal_move == ILLEGAL_MOVE_CHECK)
+            {
+                coord_to_str(&whence_check, buf, sizeof(buf));
+                printf("%s would take over the King\n", buf);
             }
         }
     }
