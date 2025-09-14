@@ -32,35 +32,3 @@ int streq_ci(const char* str1, const char* str2)
 
     return *str1 == *str2;
 }
-
-void read_command(char* comm, size_t n)
-{
-    size_t len;
-
-    /* Does not take into account the terminal buffer */
-    fflush(stdin);
-    comm = fgets(comm, (int)n, stdin);
-
-    if (comm == NULL)
-    {
-        fprintf(stderr, "Could not read stdin: exit.\n");
-        exit(1);
-    }
-
-    for (len = strlen(comm);; --len)
-    {
-        if (comm[len - 1] == '\r' || comm[len - 1] == '\n')
-            comm[len - 1] = '\0';
-        else
-            break;
-
-        if (len == 1)
-            break;
-    }
-
-    if (streq_ci(comm, "quit"))
-    {
-        printf("Bye\n");
-        exit(0);
-    }
-}

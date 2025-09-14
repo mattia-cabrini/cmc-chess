@@ -6,10 +6,28 @@
 
 #include "board.h"
 
+#define COMMAND_LENGTH 64
+
+enum
+{
+    UNKNOWN,
+    MOVE
+};
+
 typedef struct game_t
 {
     struct board_t board;
+    char           comm_buf[COMMAND_LENGTH];
+
+    const char* done;
+    turn_t      turn;
+
+    int           comm_type;
+    struct move_t comm_move;
 }* game_p;
+
+extern const char* GAME_DONE_COULD_NOT_READ_STDIN;
+extern const char* GAME_DONE_COMM_QUIT;
 
 extern void game_init(game_p);
 extern void game_run(game_p);
