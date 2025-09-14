@@ -570,3 +570,25 @@ static int coord_eq(coord_p A, coord_p B)
 {
     return A->row == B->row && A->col == B->col;
 }
+
+int board_dump(board_p B, FILE* fp)
+{
+    size_t nw;
+
+    nw = fwrite(B, 1, sizeof(struct board_t), fp);
+    if (nw != sizeof(struct board_t))
+        return 0;
+
+    return 1;
+}
+
+int board_restore(board_p B, FILE* fp)
+{
+    size_t nr;
+
+    nr = fread(B, 1, sizeof(struct board_t), fp);
+    if (nr != sizeof(struct board_t))
+        return 0;
+
+    return 1;
+}

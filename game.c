@@ -11,7 +11,10 @@
 static void game_read_command(game_p G);
 static void game_decode_command(game_p G);
 static void game_next_turn(game_p G);
-static void game_comm_move(game_p G);
+
+static void game_comm_play_move(game_p G);
+static void game_comm_dot_dump(game_p G);
+static void game_comm_dot_restore(game_p G);
 
 const char* GAME_DONE_COULD_NOT_READ_STDIN = "could not read stdin";
 const char* GAME_DONE_COMM_QUIT            = "closed by user";
@@ -20,7 +23,7 @@ void game_init(game_p G)
 {
     memset(G, 0, sizeof(struct game_t));
     G->turn      = cpWTURN;
-    G->comm_type = UNKNOWN;
+    G->comm_type = GX_UNKNOWN;
     board_init(&G->board);
 }
 
@@ -28,7 +31,14 @@ void game_run(game_p G)
 {
     while (G->done == NULL)
     {
-        /* clear(); */
+        clear();
+
+        if (G->err[0] != '\0')
+        {
+            printf("\n%s\n", G->err);
+            G->err[0] = '\0';
+        }
+
         board_print(&G->board);
 
         do
@@ -41,14 +51,20 @@ void game_run(game_p G)
             if (G->done != NULL)
                 return;
 
-            if (G->comm_type == UNKNOWN)
+            if (G->comm_type == GX_UNKNOWN)
                 printf("What did you just say?\n");
-        } while (G->comm_type == UNKNOWN);
+        } while (G->comm_type == GX_UNKNOWN);
 
         switch (G->comm_type)
         {
-        case MOVE:
-            game_comm_move(G);
+        case GD_DUMP:
+            game_comm_dot_dump(G);
+            break;
+        case GD_RESTORE:
+            game_comm_dot_restore(G);
+            break;
+        case GP_MOVE:
+            game_comm_play_move(G);
         }
     }
 }
@@ -111,19 +127,33 @@ static void game_decode_command(game_p G)
         return;
     }
 
+    if (G->comm_buf[0] == '.')
+    {
+        if (strneq_ci(G->comm_buf + 1, "dump", 4))
+        {
+            G->comm_type = GD_DUMP;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "restore", 7))
+        {
+            G->comm_type = GD_RESTORE;
+            return;
+        }
+    }
+
     if (strlen(G->comm_buf) == 4 && G->comm_buf[0] != '?')
     {
         move_init(&G->comm_move, G->comm_buf, sizeof(G->comm_buf));
-        G->comm_type = MOVE;
+        G->comm_type = GP_MOVE;
         return;
     }
 
-    G->comm_type = UNKNOWN;
+    G->comm_type = GX_UNKNOWN;
 }
 
 static void game_next_turn(game_p G) { G->turn = (turn_t)~G->turn; }
 
-static void game_comm_move(game_p G)
+static void game_comm_play_move(game_p G)
 {
     char           buf[16];
     const char*    illegal_move;
@@ -133,7 +163,7 @@ static void game_comm_move(game_p G)
         board_check_move(&G->board, &G->comm_move, G->turn, &whence_check);
     if (illegal_move != NULL)
     {
-        printf("Illegal move: %s\n", illegal_move);
+        sprintf(G->err, "Illegal move: %s\n", illegal_move);
         G->comm_buf[0] = '\0';
     }
     else
@@ -145,6 +175,80 @@ static void game_comm_move(game_p G)
     if (illegal_move == ILLEGAL_MOVE_CHECK)
     {
         coord_to_str(&whence_check, buf, sizeof(buf));
-        printf("%s would take over the King\n", buf);
+        sprintf(G->err, "%s would take over the King\n", buf);
     }
+}
+
+static void game_comm_dot_dump(game_p G)
+{
+    const char* fpath;
+    size_t      spc;
+    FILE*       fp;
+    int         ok;
+
+    for (spc = 0; G->comm_buf[spc] && G->comm_buf[spc] != ' '; ++spc)
+        ;
+
+    fpath = G->comm_buf + spc + 1;
+
+    fp    = fopen(fpath, "w+");
+    if (fp == NULL)
+    {
+        strncpy(G->err, "could not open file", sizeof(G->err));
+        return;
+    }
+
+    ok = board_dump(&G->board, fp);
+    if (!ok)
+    {
+        strncpy(G->err, "could not write board to file", sizeof(G->err));
+        return;
+    }
+
+    ok = (int)fwrite(&G->turn, 1, sizeof(G->turn), fp);
+    if (ok != (int)sizeof(G->turn))
+    {
+        strncpy(G->err, "could not write current turn to file", sizeof(G->err));
+        return;
+    }
+
+    strncpy(G->err, "dump done", sizeof(G->err));
+    fclose(fp);
+}
+
+static void game_comm_dot_restore(game_p G)
+{
+    const char* fpath;
+    size_t      spc;
+    FILE*       fp;
+    int         ok;
+
+    for (spc = 0; G->comm_buf[spc] && G->comm_buf[spc] != ' '; ++spc)
+        ;
+
+    fpath = G->comm_buf + spc + 1;
+
+    fp    = fopen(fpath, "r");
+    if (fp == NULL)
+    {
+        strncpy(G->err, "could not open file", sizeof(G->err));
+        return;
+    }
+
+    ok = board_restore(&G->board, fp);
+    if (!ok)
+    {
+        strncpy(G->err, "could not read board from file", sizeof(G->err));
+        return;
+    }
+
+    ok = (int)fread(&G->turn, 1, sizeof(G->turn), fp);
+    if (ok != (int)sizeof(G->turn))
+    {
+        strncpy(G->err, "could not read turn from file", sizeof(G->err));
+        return;
+    }
+
+    strncpy(G->err, "restore done", sizeof(G->err));
+    fclose(fp);
 }

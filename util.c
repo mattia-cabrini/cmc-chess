@@ -32,3 +32,18 @@ int streq_ci(const char* str1, const char* str2)
 
     return *str1 == *str2;
 }
+
+int strneq_ci(const char* str1, const char* str2, size_t n)
+{
+    while (*str1 && *str2 && n)
+    {
+        if (tolower(*str1) != tolower(*str2))
+            return 0;
+
+        ++str1;
+        ++str2;
+        --n;
+    }
+
+    return n == 0 || *str1 == *str2;
+}

@@ -8,5 +8,6 @@
 
 extern void clear(void);
 extern int  streq_ci(const char* str1, const char* str2);
+extern int  strneq_ci(const char* str1, const char* str2, size_t n);
 
 #endif /* CMC_CHESS_UTIL_H */

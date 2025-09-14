@@ -6,20 +6,27 @@
 
 #include "board.h"
 
-#define COMMAND_LENGTH 64
+#define GAME_COMMAND_LENGTH 256
 
 enum
 {
-    UNKNOWN,
-    MOVE
+    GX_UNKNOWN,
+
+    /* Dot Command */
+    GD_DUMP,
+    GD_RESTORE,
+
+    /* Play */
+    GP_MOVE
 };
 
 typedef struct game_t
 {
     struct board_t board;
-    char           comm_buf[COMMAND_LENGTH];
+    char           comm_buf[GAME_COMMAND_LENGTH];
 
     const char* done;
+    char        err[GAME_COMMAND_LENGTH];
     turn_t      turn;
 
     int           comm_type;

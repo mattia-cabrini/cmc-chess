@@ -5,6 +5,7 @@
 #define CMC_CHESS_BOARD_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "int.h"
 #include "piece.h"
@@ -73,6 +74,9 @@ extern void board_exec(board_p B, move_p M);
  * Whence is set only if king is under check. It otherwise remains untouched.
  */
 extern void board_under_check_part(board_p B, coord_p king, coord_p whence);
+
+extern int board_dump(board_p B, FILE* fp);
+extern int board_restore(board_p B, FILE* fp);
 
 /**
  * A move is a string like:
