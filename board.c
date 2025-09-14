@@ -46,6 +46,9 @@ const char* ILLEGAL_MOVE_KNIGHT_DESC =
     "and one horizontal";
 const char* ILLEGAL_MOVE_BISHOP_DESC =
     "bishop can only move on a diagonal line, without jumping pieces";
+const char* ILLEGAL_MOVE_QUEEN_DESC =
+    "queen can move on a diagonal line, a horizontal line or a vertical line, "
+    "but without jumping pieces";
 
 static void move_init_part(const char* str, coord_p C);
 
@@ -329,10 +332,17 @@ static const char* board_is_illegal_BISHOP_move(board_p B, move_p M)
 
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M)
 {
-    (void)B;
-    (void)M;
+    const char* err;
 
-    return ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
+    err = board_is_illegal_ROOK_move(B, M);
+    if (err == NULL)
+        return NULL;
+
+    err = board_is_illegal_BISHOP_move(B, M);
+    if (err == NULL)
+        return NULL;
+
+    return ILLEGAL_MOVE_QUEEN_DESC;
 }
 
 static const char* board_is_illegal_KING_move(board_p B, move_p M)
