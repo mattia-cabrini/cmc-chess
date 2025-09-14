@@ -1,12 +1,19 @@
 /* Copyright (c) 2025 Mattia Cabrini      */
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "board.h"
 #include "game.h"
 #include "util.h"
+
+static void game_msg_init(game_msg_p E);
+static void game_msg_append(game_msg_p E, const char* str);
+static void game_msg_vappend(game_msg_p E, ...);
+static void game_msg_flush(game_msg_p E);
+static void game_msg_clear(game_msg_p E);
 
 static void game_read_command(game_p G);
 static void game_decode_command(game_p G);
@@ -22,6 +29,7 @@ const char* GAME_DONE_COMM_QUIT            = "closed by user";
 void game_init(game_p G)
 {
     memset(G, 0, sizeof(struct game_t));
+    game_msg_init(&G->message);
     G->turn      = cpWTURN;
     G->comm_type = GX_UNKNOWN;
     board_init(&G->board);
@@ -33,13 +41,8 @@ void game_run(game_p G)
     {
         clear();
 
-        if (G->err[0] != '\0')
-        {
-            printf("\n%s\n", G->err);
-            G->err[0] = '\0';
-        }
-
         board_print(&G->board);
+        game_msg_flush(&G->message);
 
         do
         {
@@ -163,7 +166,9 @@ static void game_comm_play_move(game_p G)
         board_check_move(&G->board, &G->comm_move, G->turn, &whence_check);
     if (illegal_move != NULL)
     {
-        sprintf(G->err, "Illegal move: %s\n", illegal_move);
+        game_msg_vappend(
+            &G->message, "Illegal move: ", illegal_move, "\n", NULL
+        );
         G->comm_buf[0] = '\0';
     }
     else
@@ -175,7 +180,7 @@ static void game_comm_play_move(game_p G)
     if (illegal_move == ILLEGAL_MOVE_CHECK)
     {
         coord_to_str(&whence_check, buf, sizeof(buf));
-        sprintf(G->err, "%s would take over the King\n", buf);
+        game_msg_vappend(&G->message, buf, " would take over the King\n", NULL);
     }
 }
 
@@ -194,25 +199,25 @@ static void game_comm_dot_dump(game_p G)
     fp    = fopen(fpath, "w+");
     if (fp == NULL)
     {
-        strncpy(G->err, "could not open file", sizeof(G->err));
+        game_msg_append(&G->message, "could not open file");
         return;
     }
 
     ok = board_dump(&G->board, fp);
     if (!ok)
     {
-        strncpy(G->err, "could not write board to file", sizeof(G->err));
+        game_msg_append(&G->message, "could not write board to file");
         return;
     }
 
     ok = (int)fwrite(&G->turn, 1, sizeof(G->turn), fp);
     if (ok != (int)sizeof(G->turn))
     {
-        strncpy(G->err, "could not write current turn to file", sizeof(G->err));
+        game_msg_append(&G->message, "could not write current turn to file");
         return;
     }
 
-    strncpy(G->err, "dump done", sizeof(G->err));
+    game_msg_append(&G->message, "dump done");
     fclose(fp);
 }
 
@@ -231,24 +236,61 @@ static void game_comm_dot_restore(game_p G)
     fp    = fopen(fpath, "r");
     if (fp == NULL)
     {
-        strncpy(G->err, "could not open file", sizeof(G->err));
+        game_msg_append(&G->message, "could not open file");
         return;
     }
 
     ok = board_restore(&G->board, fp);
     if (!ok)
     {
-        strncpy(G->err, "could not read board from file", sizeof(G->err));
+        game_msg_append(&G->message, "could not read board from file");
         return;
     }
 
     ok = (int)fread(&G->turn, 1, sizeof(G->turn), fp);
     if (ok != (int)sizeof(G->turn))
     {
-        strncpy(G->err, "could not read turn from file", sizeof(G->err));
+        game_msg_append(&G->message, "could not read turn from file");
         return;
     }
 
-    strncpy(G->err, "restore done", sizeof(G->err));
+    game_msg_append(&G->message, "restore done");
     fclose(fp);
 }
+
+static void game_msg_append(game_msg_p E, const char* str)
+{
+    while (E->cur < E->buf + sizeof(E->buf) - 1 && (*(E->cur++) = *str++))
+        ;
+
+    if (E->cur == E->buf + sizeof(E->buf) - 1)
+        *E->cur = '\0';
+    else
+        --E->cur; /* Next time \0 will be overwritten */
+}
+
+static void game_msg_flush(game_msg_p E)
+{
+    puts(E->buf);
+    game_msg_clear(E);
+}
+
+static void game_msg_clear(game_msg_p E)
+{
+    E->buf[0] = '\0';
+    E->cur    = E->buf;
+}
+
+static void game_msg_vappend(game_msg_p E, ...)
+{
+    const char* strx;
+    va_list     args;
+
+    va_start(args, E);
+    while ((strx = va_arg(args, const char*)) != NULL)
+        game_msg_append(E, strx);
+
+    va_end(args);
+}
+
+static void game_msg_init(game_msg_p E) { game_msg_clear(E); }

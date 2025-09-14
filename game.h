@@ -6,7 +6,17 @@
 
 #include "board.h"
 
+#ifdef __AVR__
+
+#define GAME_COMMAND_LENGTH 64
+#define GAME_ERR_LENGTH 64
+
+#else
+
 #define GAME_COMMAND_LENGTH 256
+#define GAME_ERR_LENGTH 1024
+
+#endif
 
 enum
 {
@@ -20,13 +30,19 @@ enum
     GP_MOVE
 };
 
+typedef struct game_msg_t
+{
+    char  buf[GAME_ERR_LENGTH];
+    char* cur; /* Index of next writable char */
+}* game_msg_p;
+
 typedef struct game_t
 {
-    struct board_t board;
-    char           comm_buf[GAME_COMMAND_LENGTH];
+    struct game_msg_t message;
+    struct board_t    board;
+    char              comm_buf[GAME_COMMAND_LENGTH];
 
     const char* done;
-    char        err[GAME_COMMAND_LENGTH];
     turn_t      turn;
 
     int           comm_type;
