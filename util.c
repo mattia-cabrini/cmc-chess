@@ -47,3 +47,74 @@ int strneq_ci(const char* str1, const char* str2, size_t n)
 
     return n == 0 || *str1 == *str2;
 }
+
+void trim_left(char* str)
+{
+    size_t len;
+    size_t first_nb;
+    size_t cur;
+    int    br = 0;
+
+#ifdef DEBUG
+    printf("DEBUG trim_left before: `%s`\n", str);
+#endif
+
+    len = strlen(str);
+    for (first_nb = 0; !br && str[first_nb]; ++first_nb)
+    {
+        switch (str[first_nb])
+        {
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+            br = 0;
+            break;
+        default:
+            br = 1;
+        }
+    }
+
+    --first_nb;
+    for (cur = 0; cur <= len - first_nb; ++cur)
+        str[cur] = str[cur + first_nb];
+
+#ifdef DEBUG
+    printf("DEBUG trim_left after: `%s`\n", str);
+#endif
+}
+
+void trim_right(char* str)
+{
+    size_t len;
+
+#ifdef DEBUG
+    printf("DEBUG trim_right before: `%s`\n", str);
+#endif
+
+    for (len = strlen(str); len > 0; --len)
+    {
+        switch (str[len - 1])
+        {
+        case ' ':
+        case '\t':
+        case '\n':
+        case '\r':
+            str[len - 1] = '\0';
+            break;
+        default:
+            /* Combined with --len at for declaration will break the loop */
+            len = 1;
+        }
+    }
+
+#ifdef DEBUG
+    printf("DEBUG trim_right after: `%s`\n", str);
+#endif
+}
+
+void trim(char* str)
+{
+    trim_left(str);
+    trim_right(str);
+}

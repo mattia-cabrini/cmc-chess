@@ -94,6 +94,7 @@ extern int board_restore(board_p B, FILE* fp);
 extern void move_init(move_p M, const char* str, size_t n);
 extern int  board_coord_out_of_bound(coord_p);
 
+extern void coord_init_by_str(coord_p C, const char* str);
 extern void coord_to_str(coord_p C, char* buf, size_t n);
 
 #endif /* CMC_CHESS_BOARD_H */

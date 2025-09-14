@@ -54,7 +54,6 @@ const char* ILLEGAL_MOVE_QUEEN_DESC =
 const char* ILLEGAL_MOVE_KING_DESC =
     "King can only move one position and cannot take over";
 
-static void move_init_part(const char* str, coord_p C);
 static void move_set_offset(move_p M);
 
 static const char* board_is_illegal_PAWN_move(board_p B, move_p M);
@@ -434,7 +433,7 @@ static const char* board_is_illegal_KING_move(board_p B, move_p M)
     return NULL;
 }
 
-static void move_init_part(const char* str, coord_p C)
+void coord_init_by_str(coord_p C, const char* str)
 {
     C->col = (myint8_t)((str[0] & TO_UPPER_MASK) - 'A');
     C->row = (myint8_t)(str[1] - '0' - 1);
@@ -473,8 +472,8 @@ void move_init(move_p M, const char* str, size_t n)
         return;
     }
 
-    move_init_part(trim_str, &M->source);
-    move_init_part(trim_str + 2, &M->dest);
+    coord_init_by_str(&M->source, trim_str);
+    coord_init_by_str(&M->dest, trim_str + 2);
 
     move_set_offset(M);
 }

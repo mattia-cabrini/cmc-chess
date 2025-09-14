@@ -22,6 +22,7 @@ static void game_next_turn(game_p G);
 static void game_comm_play_move(game_p G);
 static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
+static void game_comm_qm_list(game_p G);
 
 const char* GAME_DONE_COULD_NOT_READ_STDIN = "could not read stdin";
 const char* GAME_DONE_COMM_QUIT            = "closed by user";
@@ -66,18 +67,19 @@ void game_run(game_p G)
         case GD_RESTORE:
             game_comm_dot_restore(G);
             break;
+        case GQ_LIST:
+            game_comm_qm_list(G);
+            break;
         case GP_MOVE:
             game_comm_play_move(G);
+            break;
         }
     }
 }
 
 static void game_read_command(game_p G)
 {
-    size_t len;
-    size_t first_nb;
-    size_t cur;
-    char*  control;
+    char* control;
 
     /* Does not take into account the terminal buffer */
     fflush(stdin);
@@ -89,37 +91,9 @@ static void game_read_command(game_p G)
         return;
     }
 
-#ifdef DEBUG
-    printf("DEBUG comm: `%s`\n", G->comm_buf);
-#endif
-
     /* Remove trailing \n or \r */
-    for (len = strlen(G->comm_buf);; --len)
-    {
-        if (G->comm_buf[len - 1] == '\r' || G->comm_buf[len - 1] == '\n')
-            G->comm_buf[len - 1] = '\0';
-        else
-            break;
-
-        if (len == 1)
-            break;
-    }
-
-    len = strlen(G->comm_buf);
-    for (first_nb = 0; G->comm_buf[first_nb]; ++first_nb)
-    {
-        if (G->comm_buf[first_nb] == ' ' || G->comm_buf[first_nb] == '\t')
-            continue;
-
-        break;
-    }
-
-    for (cur = 0; cur <= len - first_nb; ++cur)
-        G->comm_buf[cur] = G->comm_buf[cur + first_nb];
-
-#ifdef DEBUG
-    printf("DEBUG comm after trim: `%s`\n", G->comm_buf);
-#endif
+    trim_right(G->comm_buf);
+    trim_left(G->comm_buf);
 }
 
 static void game_decode_command(game_p G)
@@ -130,8 +104,9 @@ static void game_decode_command(game_p G)
         return;
     }
 
-    if (G->comm_buf[0] == '.')
+    switch (G->comm_buf[0])
     {
+    case '.':
         if (strneq_ci(G->comm_buf + 1, "dump", 4))
         {
             G->comm_type = GD_DUMP;
@@ -142,13 +117,19 @@ static void game_decode_command(game_p G)
             G->comm_type = GD_RESTORE;
             return;
         }
-    }
-
-    if (strlen(G->comm_buf) == 4 && G->comm_buf[0] != '?')
-    {
-        move_init(&G->comm_move, G->comm_buf, sizeof(G->comm_buf));
-        G->comm_type = GP_MOVE;
+        break;
+    case '?':
+        trim(G->comm_buf + 1);
+        G->comm_type = GQ_LIST;
         return;
+        break;
+    default:
+        if (strlen(G->comm_buf) == 4 && G->comm_buf[0] != '?')
+        {
+            move_init(&G->comm_move, G->comm_buf, sizeof(G->comm_buf));
+            G->comm_type = GP_MOVE;
+            return;
+        }
     }
 
     G->comm_type = GX_UNKNOWN;
@@ -294,3 +275,21 @@ static void game_msg_vappend(game_msg_p E, ...)
 }
 
 static void game_msg_init(game_msg_p E) { game_msg_clear(E); }
+
+static void game_comm_qm_list(game_p G)
+{
+    struct coord_t DST[28];
+    struct coord_t src;
+
+    (void)DST;
+
+    coord_init_by_str(&src, G->comm_buf + 1);
+    if (board_coord_out_of_bound(&src))
+    {
+        game_msg_append(&G->message, "Out of bound.\n");
+        return;
+    }
+
+    /* board_list_move(&G->board, &src); */
+    game_msg_append(&G->message, "Not implemented, yet...\n");
+}

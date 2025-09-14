@@ -26,6 +26,9 @@ enum
     GD_DUMP,
     GD_RESTORE,
 
+    /* Question Mark Command */
+    GQ_LIST,
+
     /* Play */
     GP_MOVE
 };
