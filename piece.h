@@ -6,8 +6,8 @@
 
 #include "int.h"
 
-typedef int8_t  piece_t;
-typedef piece_t turn_t;
+typedef myint8_t piece_t;
+typedef piece_t  turn_t;
 
 /* Using defines bacause const cannot be used in array static initialization */
 #define cpEEMPTY ((piece_t)0)

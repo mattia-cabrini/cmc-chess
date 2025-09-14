@@ -8,11 +8,13 @@
 
 /* C89 does not provide [u]intN_t types */
 #ifndef int8_t
+
 #if CHAR_BIT == 8
-#define int8_t char
+typedef char myint8_t;
 #else
 #error "No suitable 8 bit data type"
 #endif
+
 #endif
 
 #endif /* CMC_CHESS_INT_H */
