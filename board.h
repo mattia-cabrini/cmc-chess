@@ -78,6 +78,8 @@ extern void board_under_check_part(board_p B, coord_p king, coord_p whence);
 extern int board_dump(board_p B, FILE* fp);
 extern int board_restore(board_p B, FILE* fp);
 
+extern void board_list_moves(board_p B, coord_p src, coord_p dst, size_t n);
+
 /**
  * A move is a string like:
  *

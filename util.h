@@ -4,7 +4,24 @@
 #ifndef CMC_CHESS_UTIL_H
 #define CMC_CHESS_UTIL_H
 
-#include "board.h"
+#include <stdlib.h>
+
+#define assert_return_void(cond)                                               \
+    {                                                                          \
+        if (!(cond))                                                           \
+            return;                                                            \
+    }
+#define assert_return(cond, value)                                             \
+    {                                                                          \
+        if (!(cond))                                                           \
+            return value;                                                      \
+    }
+
+#define assert_fatal(cond, n)                                                  \
+    {                                                                          \
+        if (!(cond))                                                           \
+            exit(n);                                                           \
+    }
 
 extern void clear(void);
 

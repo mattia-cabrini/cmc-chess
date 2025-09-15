@@ -278,10 +278,14 @@ static void game_msg_init(game_msg_p E) { game_msg_clear(E); }
 
 static void game_comm_qm_list(game_p G)
 {
-    struct coord_t DST[28];
+    struct coord_t DST[GAME_MAX_MOVE_FOR_ONE_PIECE];
     struct coord_t src;
+    size_t         cur;
+    char           buf[3];
 
-    (void)DST;
+    /* Invalidate DST */
+    for (cur = 0; cur < GAME_MAX_MOVE_FOR_ONE_PIECE; ++cur)
+        DST[cur].row = -1;
 
     coord_init_by_str(&src, G->comm_buf + 1);
     if (board_coord_out_of_bound(&src))
@@ -290,6 +294,14 @@ static void game_comm_qm_list(game_p G)
         return;
     }
 
-    /* board_list_move(&G->board, &src); */
-    game_msg_append(&G->message, "Not implemented, yet...\n");
+    board_list_moves(&G->board, &src, DST, GAME_MAX_MOVE_FOR_ONE_PIECE);
+
+    if (DST[0].row == -1)
+        game_msg_vappend(&G->message, "! No move\n", NULL);
+
+    for (cur = 0; cur < GAME_MAX_MOVE_FOR_ONE_PIECE && DST[cur].row >= 0; ++cur)
+    {
+        coord_to_str(DST + cur, buf, sizeof(buf));
+        game_msg_vappend(&G->message, "> ", buf, "\n", NULL);
+    }
 }

@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include "int.h"
+#include "util.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -62,6 +63,8 @@ static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M);
 static const char* board_is_illegal_BISHOP_move(board_p B, move_p M);
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M);
 static const char* board_is_illegal_KING_move(board_p B, move_p M);
+
+static void board_list_PAWN_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 
@@ -590,4 +593,74 @@ int board_restore(board_p B, FILE* fp)
         return 0;
 
     return 1;
+}
+
+static void board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    struct coord_t possible_dst;
+    myint8_t       incr;
+    size_t         cur;
+
+    cur = 0;
+    assert_return_void((n > cur));
+
+    incr         = board_get_at(B, src) > 0 ? -1 : 1;
+    possible_dst = *src;
+
+    /* Advance by one only if destination is empty */
+    possible_dst.row = (myint8_t)(possible_dst.row + incr);
+    if (!board_coord_out_of_bound(&possible_dst) &&
+        board_get_at(B, &possible_dst) == cpEEMPTY)
+    {
+        dst[cur++] = possible_dst;
+        assert_return_void(n > cur);
+    }
+
+    /* If PAWN is in initial position, let's check if it can advance by two */
+    if ((src->row == 1 && incr == 1) || (src->row == 6 && incr == -1))
+    {
+        possible_dst.row = (myint8_t)(possible_dst.row + incr);
+        if (!board_coord_out_of_bound(&possible_dst) &&
+            board_get_at(B, &possible_dst) == cpEEMPTY)
+        {
+            dst[cur++] = possible_dst;
+            assert_return_void(n > cur);
+        }
+
+        /* Get back! */
+        possible_dst.row = (myint8_t)(possible_dst.row - incr);
+    }
+
+    /* Now src is the original src + incr;
+     * Let's see if PAWN can take over something
+     */
+    possible_dst.col = (myint8_t)(possible_dst.col + 1);
+    if (!board_coord_out_of_bound(&possible_dst) &&
+        board_get_at(B, &possible_dst) != cpEEMPTY)
+    {
+        dst[cur++] = possible_dst;
+        assert_return_void(n > cur);
+    }
+
+    possible_dst.col = (myint8_t)(possible_dst.col - 2);
+    if (!board_coord_out_of_bound(&possible_dst) &&
+        board_get_at(B, &possible_dst) != cpEEMPTY)
+        dst[cur++] = possible_dst;
+}
+
+void board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    piece_t src_piece;
+
+    assert_return_void(n > 0);
+
+    src_piece = board_get_at(B, src);
+    switch (src_piece)
+    {
+    case cpWPAWN:
+    case cpBPAWN:
+        board_list_PAWN_moves(B, src, dst, n);
+    default:
+        return;
+    }
 }

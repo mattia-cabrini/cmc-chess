@@ -18,6 +18,8 @@
 
 #endif
 
+#define GAME_MAX_MOVE_FOR_ONE_PIECE 28
+
 enum
 {
     GX_UNKNOWN,
