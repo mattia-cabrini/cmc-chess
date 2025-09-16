@@ -75,6 +75,8 @@ static size_t
 board_list_PAWN_moves(board_p, coord_p src, coord_p dst, size_t n);
 static size_t
 board_list_ROOK_moves(board_p, coord_p src, coord_p dst, size_t n);
+static size_t
+board_list_BISHOP_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 
@@ -733,6 +735,34 @@ board_list_ROOK_moves(board_p B, coord_p src, coord_p dst, size_t n)
     return cur;
 }
 
+static size_t
+board_list_BISHOP_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    struct coord_t incr;
+    size_t         cur;
+
+    assert_return(n > 0, 0);
+    cur      = 0;
+
+    incr.row = 1;
+    incr.col = 1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = 1;
+    incr.col = -1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = -1;
+    incr.col = 1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = -1;
+    incr.col = -1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    return cur;
+}
+
 int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
 {
     piece_t src_piece;
@@ -748,6 +778,9 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
     case cpWROOK:
     case cpBROOK:
         return (int)board_list_ROOK_moves(B, src, dst, n);
+    case cpWBISHOP:
+    case cpBBISHOP:
+        return (int)board_list_BISHOP_moves(B, src, dst, n);
     }
 
     return -1;
