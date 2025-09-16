@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -280,12 +281,9 @@ static void game_comm_qm_list(game_p G)
 {
     struct coord_t DST[GAME_MAX_MOVE_FOR_ONE_PIECE];
     struct coord_t src;
-    size_t         cur;
+    int            cur;
+    int            ncord;
     char           buf[3];
-
-    /* Invalidate DST */
-    for (cur = 0; cur < GAME_MAX_MOVE_FOR_ONE_PIECE; ++cur)
-        DST[cur].row = -1;
 
     coord_init_by_str(&src, G->comm_buf + 1);
     if (board_coord_out_of_bound(&src))
@@ -294,12 +292,15 @@ static void game_comm_qm_list(game_p G)
         return;
     }
 
-    board_list_moves(&G->board, &src, DST, GAME_MAX_MOVE_FOR_ONE_PIECE);
+    ncord = board_list_moves(&G->board, &src, DST, GAME_MAX_MOVE_FOR_ONE_PIECE);
 
-    if (DST[0].row == -1)
+    if (ncord == 0)
         game_msg_vappend(&G->message, "! No move\n", NULL);
 
-    for (cur = 0; cur < GAME_MAX_MOVE_FOR_ONE_PIECE && DST[cur].row >= 0; ++cur)
+    if (ncord == -1 || ncord > GAME_MAX_MOVE_FOR_ONE_PIECE)
+        game_msg_vappend(&G->message, "! ERR\n", NULL);
+
+    for (cur = 0; cur < ncord; ++cur)
     {
         coord_to_str(DST + cur, buf, sizeof(buf));
         game_msg_vappend(&G->message, "> ", buf, "\n", NULL);

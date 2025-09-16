@@ -64,7 +64,17 @@ static const char* board_is_illegal_BISHOP_move(board_p B, move_p M);
 static const char* board_is_illegal_QUEEN_move(board_p B, move_p M);
 static const char* board_is_illegal_KING_move(board_p B, move_p M);
 
-static void board_list_PAWN_moves(board_p, coord_p src, coord_p dst, size_t n);
+/* Check and return any viable straight move by increments of incr.
+ * incr should be R/C=-1/-1, for diagonal move going TL, R/C=1/-1, going BL, ...
+ */
+static size_t board_list_ANY_STRAIGHT_moves(
+    board_p, coord_p src, coord_p incr, coord_p dst, size_t n
+);
+
+static size_t
+board_list_PAWN_moves(board_p, coord_p src, coord_p dst, size_t n);
+static size_t
+board_list_ROOK_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 
@@ -595,15 +605,18 @@ int board_restore(board_p B, FILE* fp)
     return 1;
 }
 
-static void board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
+static size_t
+board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
 {
+    piece_t        src_piece;
     struct coord_t possible_dst;
     myint8_t       incr;
     size_t         cur;
 
     cur = 0;
-    assert_return_void((n > cur));
+    assert_return(n > cur, cur);
 
+    src_piece    = board_get_at(B, src);
     incr         = board_get_at(B, src) > 0 ? -1 : 1;
     possible_dst = *src;
 
@@ -613,7 +626,7 @@ static void board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
         board_get_at(B, &possible_dst) == cpEEMPTY)
     {
         dst[cur++] = possible_dst;
-        assert_return_void(n > cur);
+        assert_return(n > cur, cur);
     }
 
     /* If PAWN is in initial position, let's check if it can advance by two */
@@ -624,7 +637,7 @@ static void board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
             board_get_at(B, &possible_dst) == cpEEMPTY)
         {
             dst[cur++] = possible_dst;
-            assert_return_void(n > cur);
+            assert_return(n > cur, cur);
         }
 
         /* Get back! */
@@ -636,31 +649,106 @@ static void board_list_PAWN_moves(board_p B, coord_p src, coord_p dst, size_t n)
      */
     possible_dst.col = (myint8_t)(possible_dst.col + 1);
     if (!board_coord_out_of_bound(&possible_dst) &&
-        board_get_at(B, &possible_dst) != cpEEMPTY)
+        board_get_at(B, &possible_dst) != cpEEMPTY &&
+        (board_get_at(B, &possible_dst) ^ src_piece) < 0)
     {
         dst[cur++] = possible_dst;
-        assert_return_void(n > cur);
+        assert_return(n > cur, cur);
     }
 
     possible_dst.col = (myint8_t)(possible_dst.col - 2);
     if (!board_coord_out_of_bound(&possible_dst) &&
-        board_get_at(B, &possible_dst) != cpEEMPTY)
+        board_get_at(B, &possible_dst) != cpEEMPTY &&
+        (board_get_at(B, &possible_dst) ^ src_piece) < 0)
         dst[cur++] = possible_dst;
+
+    return cur;
 }
 
-void board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
+static size_t board_list_ANY_STRAIGHT_moves(
+    board_p B, coord_p src, coord_p incr, coord_p dst, size_t n
+)
+{
+    struct coord_t candidate;
+    piece_t        src_piece;
+    size_t         cur;
+
+    assert_return(n > 0, 0);
+    cur           = 0;
+    candidate     = *src;
+
+    src_piece     = board_get_at(B, src);
+
+    candidate.row = (myint8_t)(candidate.row + incr->row);
+    candidate.col = (myint8_t)(candidate.col + incr->col);
+
+    while (!board_coord_out_of_bound(&candidate) && cur < n)
+    {
+        if (board_get_at(B, &candidate) == cpEEMPTY)
+        {
+            dst[cur++] = candidate;
+        }
+        else if ((board_get_at(B, &candidate) ^ src_piece) < 0)
+        {
+            dst[cur++] = candidate;
+            break;
+        }
+        else
+        {
+            break;
+        }
+
+        candidate.row = (myint8_t)(candidate.row + incr->row);
+        candidate.col = (myint8_t)(candidate.col + incr->col);
+    }
+
+    return cur;
+}
+
+static size_t
+board_list_ROOK_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    struct coord_t incr;
+    size_t         cur;
+
+    assert_return(n > 0, 0);
+    cur      = 0;
+
+    incr.row = 1;
+    incr.col = 0;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = -1;
+    incr.col = 0;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = 0;
+    incr.col = 1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    incr.row = 0;
+    incr.col = -1;
+    cur += board_list_ANY_STRAIGHT_moves(B, src, &incr, dst + cur, n - cur);
+
+    return cur;
+}
+
+int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
 {
     piece_t src_piece;
 
-    assert_return_void(n > 0);
+    assert_return(n > 0, -1);
 
     src_piece = board_get_at(B, src);
     switch (src_piece)
     {
     case cpWPAWN:
     case cpBPAWN:
-        board_list_PAWN_moves(B, src, dst, n);
-    default:
-        return;
+        return (int)board_list_PAWN_moves(B, src, dst, n);
+    case cpWROOK:
+    case cpBROOK:
+        return (int)board_list_ROOK_moves(B, src, dst, n);
     }
+
+    return -1;
 }
