@@ -79,6 +79,8 @@ static size_t
 board_list_BISHOP_moves(board_p, coord_p src, coord_p dst, size_t n);
 static size_t
 board_list_QUEEN_moves(board_p, coord_p src, coord_p dst, size_t n);
+static size_t
+board_list_KNIGHT_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 
@@ -779,6 +781,67 @@ board_list_QUEEN_moves(board_p B, coord_p src, coord_p dst, size_t n)
     return cur;
 }
 
+static size_t
+board_list_KNIGHT_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    size_t         cur;
+    struct coord_t candidate;
+    piece_t        dst_piece;
+    piece_t        src_piece;
+
+    assert_return(n > 0, 0);
+
+    cur       = 0;
+    src_piece = board_get_at(B, src);
+
+    /* Positions To Test
+     *
+     * Offset with respect to src
+     * ROW -- +2 -2 -2 +2 // +1 -1 -1 +1
+     * COL -- +1 +1 -1 -1 // +2 +2 -2 -2
+     *
+     * Move through the code
+     * ROW -- +2 -4 +0 +4 // -1 -2 +0 +2
+     * COL -- +1 +0 -2 -0 // +3 +0 -4 -0
+     */
+
+    candidate = *src;
+
+    /* Using a MACRO because it is a lot of replicated code:
+     * - It is ok to replicate it (the alternative would be a function in the
+     * hope that the optimizer would embed it);
+     * - It is reasonably simple.
+     */
+#define board_list_KNIGHT_moves_autogen_check(RR, CC)                          \
+    {                                                                          \
+        candidate.row = (myint8_t)(candidate.row + (RR));                      \
+        candidate.col = (myint8_t)(candidate.col + (CC));                      \
+        dst_piece     = board_get_at(B, &candidate);                           \
+        if (!board_coord_out_of_bound(&candidate))                             \
+        {                                                                      \
+            if ((dst_piece == cpEEMPTY || (dst_piece ^ src_piece) < 0))        \
+            {                                                                  \
+                dst[cur++] = candidate;                                        \
+                assert_return(n > cur, cur);                                   \
+            }                                                                  \
+        }                                                                      \
+    }
+
+    board_list_KNIGHT_moves_autogen_check(2, 1);
+    board_list_KNIGHT_moves_autogen_check(-4, 0);
+    board_list_KNIGHT_moves_autogen_check(0, -2);
+    board_list_KNIGHT_moves_autogen_check(4, 0);
+
+    board_list_KNIGHT_moves_autogen_check(-1, 3);
+    board_list_KNIGHT_moves_autogen_check(-2, 0);
+    board_list_KNIGHT_moves_autogen_check(0, -4);
+    board_list_KNIGHT_moves_autogen_check(2, 0);
+
+#undef board_list_KNIGHT_moves_autogen_check
+
+    return cur;
+}
+
 int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
 {
     piece_t src_piece;
@@ -800,6 +863,9 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
     case cpWQUEEN:
     case cpBQUEEN:
         return (int)board_list_QUEEN_moves(B, src, dst, n);
+    case cpWKNIGHT:
+    case cpBKNIGHT:
+        return (int)board_list_KNIGHT_moves(B, src, dst, n);
     }
 
     return -1;
