@@ -71,6 +71,9 @@ static size_t board_list_ANY_STRAIGHT_moves(
     board_p, coord_p src, coord_p incr, coord_p dst, size_t n
 );
 
+/* These functions tell any possible move by source BUT they do not check
+ * whether or not a move might result in a check
+ */
 static size_t
 board_list_PAWN_moves(board_p, coord_p src, coord_p dst, size_t n);
 static size_t
@@ -81,6 +84,8 @@ static size_t
 board_list_QUEEN_moves(board_p, coord_p src, coord_p dst, size_t n);
 static size_t
 board_list_KNIGHT_moves(board_p, coord_p src, coord_p dst, size_t n);
+static size_t
+board_list_KING_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 
@@ -842,6 +847,62 @@ board_list_KNIGHT_moves(board_p B, coord_p src, coord_p dst, size_t n)
     return cur;
 }
 
+static size_t
+board_list_KING_moves(board_p B, coord_p src, coord_p dst, size_t n)
+{
+    size_t         cur;
+    struct coord_t candidate;
+    piece_t        dst_piece;
+    piece_t        src_piece;
+
+    assert_return(n > 0, 0);
+
+    cur           = 0;
+    src_piece     = board_get_at(B, src);
+
+    candidate.row = (myint8_t)(src->row - 1);
+    candidate.col = (myint8_t)(src->col - 1);
+
+    do
+    {
+        dst_piece = board_get_at(B, &candidate);
+        if (!board_coord_out_of_bound(&candidate))
+        {
+            if (dst_piece == cpEEMPTY || (dst_piece ^ src_piece) < 0)
+            {
+                dst[cur++] = candidate;
+                assert_return(n > cur, cur);
+            }
+        }
+
+        /* Increment Sequence
+         * ROW -1 | -1 -1  0  1  1  1  0 | -1
+         * COL -1 |  0  1  1  1  0 -1 -1 | -1
+         */
+        switch (candidate.row - src->row)
+        {
+        case -1:
+            if (candidate.col <= src->col)
+                candidate.col = (myint8_t)(candidate.col + 1);
+            else
+                candidate.row = src->row;
+            break;
+        case 0:
+            candidate.row =
+                (myint8_t)(candidate.row + candidate.col - src->col);
+            break;
+        case 1:
+            if (candidate.col >= src->col)
+                candidate.col = (myint8_t)(candidate.col - 1);
+            else
+                candidate.row = src->row;
+            break;
+        }
+    } while (candidate.row != src->row - 1 || candidate.col != src->col - 1);
+
+    return cur;
+}
+
 int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
 {
     piece_t src_piece;
@@ -866,6 +927,9 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
     case cpWKNIGHT:
     case cpBKNIGHT:
         return (int)board_list_KNIGHT_moves(B, src, dst, n);
+    case cpWKING:
+    case cpBKING:
+        return (int)board_list_KING_moves(B, src, dst, n);
     }
 
     return -1;
