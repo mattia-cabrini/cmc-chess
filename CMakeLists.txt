@@ -41,7 +41,7 @@ endif()
 
 target_compile_options(cmc-chess PRIVATE 
 	-pedantic -pedantic-errors -Werror
-	-fanalyzer -fno-common -fPIC -Wfatal-errors
+	-fno-common -fPIC -Wfatal-errors
 
 	# Style
 	# -Wdeclaration-after-statement -Werror=declaration-after-statement
@@ -55,14 +55,7 @@ target_compile_options(cmc-chess PRIVATE
 	-Waddress
 	-Waddress-of-packed-member
 	-Waggregate-return
-	-Waggressive-loop-optimizations
-	-Walloc-size-larger-than=1048576
-	-Walloc-zero
 	-Walloca
-	-Walloca-larger-than=2048
-	-Warith-conversion
-	-Warray-bounds=2
-	-Warray-compare
 	-Wshadow
 	-Wpointer-arith
 	-Wcast-align
@@ -71,7 +64,6 @@ target_compile_options(cmc-chess PRIVATE
 	-Wold-style-definition
 	-Wformat=2
 	-Wformat-truncation
-	-Wstringop-overflow
 	-Wundef
 	-Wswitch-enum
 	-Wbad-function-cast
@@ -80,55 +72,70 @@ target_compile_options(cmc-chess PRIVATE
 	-Wdouble-promotion
 )
 
-# Analyzer
-target_compile_options(cmc-chess PRIVATE 
-	-Wanalyzer-allocation-size
-	-Wanalyzer-deref-before-check
-	-Wanalyzer-double-fclose
-	-Wanalyzer-double-free
-	-Wanalyzer-exposure-through-output-file
-	-Wanalyzer-exposure-through-uninit-copy
-	-Wanalyzer-fd-access-mode-mismatch
-	-Wanalyzer-fd-double-close
-	-Wanalyzer-fd-leak
-	-Wanalyzer-fd-phase-mismatch
-	-Wanalyzer-fd-type-mismatch
-	-Wanalyzer-fd-use-after-close
-	-Wanalyzer-fd-use-without-check
-	-Wanalyzer-file-leak
-	-Wanalyzer-free-of-non-heap
-	-Wanalyzer-imprecise-fp-arithmetic
-	-Wanalyzer-infinite-recursion
-	-Wanalyzer-jump-through-null
-	-Wanalyzer-malloc-leak
-	-Wanalyzer-mismatching-deallocation
-	-Wanalyzer-null-argument
-	-Wanalyzer-null-dereference
-	-Wanalyzer-out-of-bounds
-	-Wanalyzer-possible-null-argument
-	-Wanalyzer-possible-null-dereference
-	-Wanalyzer-putenv-of-auto-var
-	-Wanalyzer-shift-count-negative
-	-Wanalyzer-shift-count-overflow
-	-Wanalyzer-stale-setjmp-buffer
-	-Wanalyzer-tainted-allocation-size
-	-Wanalyzer-tainted-array-index
-	-Wanalyzer-tainted-assertion
-	-Wanalyzer-tainted-divisor
-	-Wanalyzer-tainted-offset
-	-Wanalyzer-tainted-size
-	-Wno-analyzer-too-complex
-	-Wanalyzer-unsafe-call-within-signal-handler
-	-Wanalyzer-use-after-free
-	-Wanalyzer-use-of-pointer-in-stale-stack-frame
-	-Wanalyzer-use-of-uninitialized-value
-	-Wanalyzer-va-arg-type-mismatch
-	-Wanalyzer-va-list-exhausted
-	-Wanalyzer-va-list-leak
-	-Wanalyzer-va-list-use-after-va-end
-	-Wanalyzer-write-to-const
-	-Wanalyzer-write-to-string-literal
-)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	# Basic Warnings
+	target_compile_options(cmc-chess PRIVATE 
+		-Waggressive-loop-optimizations
+		-Walloc-size-larger-than=1048576
+		-Walloc-zero
+		-Warith-conversion
+		-Warray-bounds=2
+		-Warray-compare
+		-Wstringop-overflow
+		-Walloca-larger-than=2048
+	)
+
+	# Analyzer
+	target_compile_options(cmc-chess PRIVATE 
+		-fanalyzer 
+		-Wanalyzer-allocation-size
+		-Wanalyzer-deref-before-check
+		-Wanalyzer-double-fclose
+		-Wanalyzer-double-free
+		-Wanalyzer-exposure-through-output-file
+		-Wanalyzer-exposure-through-uninit-copy
+		-Wanalyzer-fd-access-mode-mismatch
+		-Wanalyzer-fd-double-close
+		-Wanalyzer-fd-leak
+		-Wanalyzer-fd-phase-mismatch
+		-Wanalyzer-fd-type-mismatch
+		-Wanalyzer-fd-use-after-close
+		-Wanalyzer-fd-use-without-check
+		-Wanalyzer-file-leak
+		-Wanalyzer-free-of-non-heap
+		-Wanalyzer-imprecise-fp-arithmetic
+		-Wanalyzer-infinite-recursion
+		-Wanalyzer-jump-through-null
+		-Wanalyzer-malloc-leak
+		-Wanalyzer-mismatching-deallocation
+		-Wanalyzer-null-argument
+		-Wanalyzer-null-dereference
+		-Wanalyzer-out-of-bounds
+		-Wanalyzer-possible-null-argument
+		-Wanalyzer-possible-null-dereference
+		-Wanalyzer-putenv-of-auto-var
+		-Wanalyzer-shift-count-negative
+		-Wanalyzer-shift-count-overflow
+		-Wanalyzer-stale-setjmp-buffer
+		-Wanalyzer-tainted-allocation-size
+		-Wanalyzer-tainted-array-index
+		-Wanalyzer-tainted-assertion
+		-Wanalyzer-tainted-divisor
+		-Wanalyzer-tainted-offset
+		-Wanalyzer-tainted-size
+		-Wno-analyzer-too-complex
+		-Wanalyzer-unsafe-call-within-signal-handler
+		-Wanalyzer-use-after-free
+		-Wanalyzer-use-of-pointer-in-stale-stack-frame
+		-Wanalyzer-use-of-uninitialized-value
+		-Wanalyzer-va-arg-type-mismatch
+		-Wanalyzer-va-list-exhausted
+		-Wanalyzer-va-list-leak
+		-Wanalyzer-va-list-use-after-va-end
+		-Wanalyzer-write-to-const
+		-Wanalyzer-write-to-string-literal
+	)
+endif()
 
 if (build_type STREQUAL release)
 	# Release Specific Flags
