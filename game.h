@@ -18,8 +18,6 @@
 
 #endif
 
-#define GAME_MAX_MOVE_FOR_ONE_PIECE 28
-
 enum
 {
     GX_UNKNOWN,
@@ -52,6 +50,8 @@ typedef struct game_t
 
     int           comm_type;
     struct move_t comm_move;
+
+    turn_t checkmate;
 }* game_p;
 
 extern const char* GAME_DONE_COULD_NOT_READ_STDIN;

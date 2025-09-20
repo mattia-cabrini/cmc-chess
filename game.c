@@ -145,6 +145,16 @@ static void game_comm_play_move(game_p G)
     const char*    illegal_move;
     struct coord_t whence_check;
 
+    if (G->checkmate != cpEEMPTY)
+    {
+        game_msg_vappend(
+            &G->message,
+            "It's checkmate, no good in trying to play pal. Stacce!",
+            NULL
+        );
+        return;
+    }
+
     illegal_move =
         board_check_move(&G->board, &G->comm_move, G->turn, &whence_check);
     if (illegal_move != NULL)
@@ -360,7 +370,23 @@ static void game_refresh(game_p G)
         }
     }
 
-    printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
+    if (board_under_check_mate_part(&G->board, &G->board.wking))
+    {
+        G->checkmate = cpWTURN;
+        printf("IT'S CHECKMATE PAL!\n");
+    }
+    else if (board_under_check_mate_part(&G->board, &G->board.bking))
+    {
+        G->checkmate = cpBTURN;
+        printf("IT'S CHECKMATE PAL!\n");
+    }
+    else
+    {
+        G->checkmate = cpEEMPTY;
+    }
+
+    if (G->checkmate == cpEEMPTY)
+        printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
 
     board_print(&G->board);
     game_msg_flush(&G->message);

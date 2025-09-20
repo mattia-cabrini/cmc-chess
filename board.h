@@ -10,6 +10,8 @@
 #include "int.h"
 #include "piece.h"
 
+#define GAME_MAX_MOVE_FOR_ONE_PIECE 28
+
 typedef struct coord_t
 {
     myint8_t row;
@@ -87,6 +89,8 @@ extern void board_under_check_part(board_p B, coord_p king, coord_p whence);
  */
 extern piece_t
 board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence);
+
+extern int board_under_check_mate_part(board_p B, coord_p king);
 
 extern int board_dump(board_p B, FILE* fp);
 extern int board_restore(board_p B, FILE* fp);

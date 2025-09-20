@@ -76,6 +76,7 @@ static const char* board_is_illegal_KING_move(board_p B, move_p M);
 static size_t board_list_ANY_STRAIGHT_moves(
     board_p, coord_p src, coord_p incr, coord_p dst, size_t n
 );
+static int board_can_move_nc(board_p B, coord_p src, coord_p king);
 
 /* These functions tell any possible move by source BUT they do not check
  * whether or not a move might result in a check
@@ -955,6 +956,29 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
     return -1;
 }
 
+static int board_can_move_nc(board_p B, coord_p src, coord_p king)
+{
+    struct coord_t DST[GAME_MAX_MOVE_FOR_ONE_PIECE];
+    struct coord_t whence;
+    piece_t        king_under_check;
+    int            ncord;
+    int            n_actual_cord;
+    int            cur;
+
+    ncord         = board_list_moves(B, src, DST, sizeof(DST));
+    n_actual_cord = ncord;
+
+    for (cur = 0; cur < ncord; ++cur)
+    {
+        king_under_check = board_under_check_part_w(B, src, DST + cur, &whence);
+
+        if (king_under_check == board_get_at(B, king))
+            --n_actual_cord;
+    }
+
+    return n_actual_cord > 0;
+}
+
 piece_t
 board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence)
 {
@@ -1021,6 +1045,22 @@ board_simulation_undo(board_p B, simul_restore_p R, coord_p src, coord_p dst)
     if (board_get_at(B, src) == cpWKING)
         B->wking = *src;
 
-    if (board_get_at(B, dst) == cpBKING)
+    if (board_get_at(B, src) == cpBKING)
         B->bking = *src;
+}
+
+int board_under_check_mate_part(board_p B, coord_p king)
+{
+    int            res;
+    struct coord_t src;
+
+    res = 0;
+
+    for (src.row = 0; !res && src.row < 8; ++src.row)
+        for (src.col = 0; !res && src.col < 8; ++src.col)
+            if (board_get_at(B, &src) != cpEEMPTY &&
+                (board_get_at(B, &src) ^ board_get_at(B, king)) > 0)
+                res = board_can_move_nc(B, &src, king);
+
+    return !res;
 }
