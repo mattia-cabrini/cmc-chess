@@ -99,3 +99,11 @@ void trim(char* str)
     trim_left(str);
     trim_right(str);
 }
+
+const char* move_to_not_blank(const char* str)
+{
+    for (; *str && *str <= 32; ++str)
+        ;
+
+    return str;
+}

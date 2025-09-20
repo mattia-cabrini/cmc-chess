@@ -533,4 +533,6 @@ static void game_comm_eq_assert(game_p G)
 
     if (A.kind == ASSERT_KIND_UNKNOWN)
         game_msg_append(&G->message, err);
+    else
+        game_msg_append(&G->message, "parse ok, but not implemented, yet");
 }

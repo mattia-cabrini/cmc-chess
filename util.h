@@ -25,8 +25,9 @@
 
 extern void clear(void);
 
-extern int streq_ci(const char* str1, const char* str2);
-extern int strneq_ci(const char* str1, const char* str2, size_t n);
+extern int         streq_ci(const char* str1, const char* str2);
+extern int         strneq_ci(const char* str1, const char* str2, size_t n);
+extern const char* move_to_not_blank(const char* str);
 
 extern void trim_left(char* str);
 extern void trim_right(char* str);
