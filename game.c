@@ -28,6 +28,8 @@ static void game_comm_dot_new(game_p G);
 static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
 
+static void game_comm_eq_clear(game_p G);
+
 static void game_comm_qm_list(game_p G);
 
 const char* GAME_DONE_COULD_NOT_READ_STDIN = "could not read stdin";
@@ -77,6 +79,9 @@ void game_run(game_p G)
             break;
         case GQ_LIST:
             game_comm_qm_list(G);
+            break;
+        case GE_CLEAR:
+            game_comm_eq_clear(G);
             break;
         case GP_MOVE:
             game_comm_play_move(G);
@@ -131,6 +136,14 @@ static void game_decode_command(game_p G)
             return;
         }
         break;
+    case '=':
+        if (strneq_ci(G->comm_buf + 1, "clear", 5))
+        {
+            G->comm_type = GE_CLEAR;
+            return;
+        }
+        break;
+
     case '?':
         trim(G->comm_buf + 1);
         G->comm_type = GQ_LIST;
@@ -262,6 +275,15 @@ static void game_comm_dot_restore(game_p G)
 
     game_msg_append(&G->message, "restore done");
     fclose(fp);
+}
+
+static void game_comm_eq_clear(game_p G)
+{
+    struct coord_t src;
+
+    for (src.row = 0; src.row < 8; ++src.row)
+        for (src.col = 0; src.col < 8; ++src.col)
+            board_set_at(&G->board, &src, cpEEMPTY);
 }
 
 static void game_msg_append(game_msg_p E, const char* str)

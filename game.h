@@ -30,6 +30,9 @@ enum
     /* Question Mark Command */
     GQ_LIST,
 
+    /* Equal Command */
+    GE_CLEAR,
+
     /* Play */
     GP_MOVE
 };
