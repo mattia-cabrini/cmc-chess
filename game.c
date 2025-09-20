@@ -23,8 +23,11 @@ static void game_decode_command(game_p G);
 static void game_next_turn(game_p G);
 
 static void game_comm_play_move(game_p G);
+
+static void game_comm_dot_new(game_p G);
 static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
+
 static void game_comm_qm_list(game_p G);
 
 const char* GAME_DONE_COULD_NOT_READ_STDIN = "could not read stdin";
@@ -63,6 +66,9 @@ void game_run(game_p G)
 
         switch (G->comm_type)
         {
+        case GD_NEW:
+            game_comm_dot_new(G);
+            break;
         case GD_DUMP:
             game_comm_dot_dump(G);
             break;
@@ -117,6 +123,11 @@ static void game_decode_command(game_p G)
         if (strneq_ci(G->comm_buf + 1, "restore", 7))
         {
             G->comm_type = GD_RESTORE;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "new", 3))
+        {
+            G->comm_type = GD_NEW;
             return;
         }
         break;
@@ -176,6 +187,8 @@ static void game_comm_play_move(game_p G)
         game_msg_vappend(&G->message, buf, " would take over the King\n", NULL);
     }
 }
+
+static void game_comm_dot_new(game_p G) { game_init(G); }
 
 static void game_comm_dot_dump(game_p G)
 {

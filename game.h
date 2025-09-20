@@ -23,6 +23,7 @@ enum
     GX_UNKNOWN,
 
     /* Dot Command */
+    GD_NEW,
     GD_DUMP,
     GD_RESTORE,
 
