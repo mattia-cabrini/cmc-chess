@@ -29,6 +29,7 @@ static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
 
 static void game_comm_eq_clear(game_p G);
+static void game_comm_eq_set(game_p G);
 
 static void game_comm_qm_list(game_p G);
 
@@ -82,6 +83,9 @@ void game_run(game_p G)
             break;
         case GE_CLEAR:
             game_comm_eq_clear(G);
+            break;
+        case GE_SET:
+            game_comm_eq_set(G);
             break;
         case GP_MOVE:
             game_comm_play_move(G);
@@ -140,6 +144,11 @@ static void game_decode_command(game_p G)
         if (strneq_ci(G->comm_buf + 1, "clear", 5))
         {
             G->comm_type = GE_CLEAR;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "set", 3))
+        {
+            G->comm_type = GE_SET;
             return;
         }
         break;
@@ -284,6 +293,83 @@ static void game_comm_eq_clear(game_p G)
     for (src.row = 0; src.row < 8; ++src.row)
         for (src.col = 0; src.col < 8; ++src.col)
             board_set_at(&G->board, &src, cpEEMPTY);
+
+    G->board.wking.row = -1;
+    G->board.bking.row = -1;
+}
+
+static void game_comm_eq_set(game_p G)
+{
+    char*          comm_i;
+    size_t         cur;
+    char           buf_coord[3];
+    int            piece;
+    struct coord_t dst;
+
+    comm_i = G->comm_buf + 4; /* Command starts at =set ... */
+
+    while (*comm_i && *(comm_i++) == ' ')
+        ;
+    --comm_i;
+
+    for (cur = 0; cur < 2 && *comm_i; ++cur)
+        buf_coord[cur] = *(comm_i++);
+    buf_coord[2] = '\0';
+
+    if (sscanf(comm_i, "%d", &piece) != 1)
+    {
+        game_msg_append(&G->message, "bad format || could not read piece");
+        return;
+    }
+
+    coord_init_by_str(&dst, buf_coord);
+
+    if (board_coord_out_of_bound(&dst))
+    {
+        game_msg_append(&G->message, "bad format");
+        return;
+    }
+
+    if (piece_to_char((piece_t)piece) == 'E')
+    {
+        game_msg_append(&G->message, "bad argument; unknown piece");
+        return;
+    }
+
+    if (piece == cpWKING)
+    {
+        if (!board_coord_out_of_bound(&G->board.wking))
+        {
+            game_msg_append(
+                &G->message,
+                "White King has been moved (there can only be one King for "
+                "each player"
+            );
+            board_set_at(&G->board, &G->board.wking, cpEEMPTY);
+        }
+
+        G->board.wking = dst;
+    }
+
+    if (piece == cpBKING)
+    {
+        if (!board_coord_out_of_bound(&G->board.bking))
+        {
+            game_msg_append(
+                &G->message,
+                "Black King has been moved (there can only be one King for "
+                "each player"
+            );
+            board_set_at(&G->board, &G->board.bking, cpEEMPTY);
+        }
+
+        G->board.bking = dst;
+    }
+
+    if (piece == cpBKING)
+        G->board.bking = dst;
+
+    board_set_at(&G->board, &dst, (piece_t)piece);
 }
 
 static void game_msg_append(game_msg_p E, const char* str)

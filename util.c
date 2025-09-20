@@ -3,8 +3,8 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "util.h"
 
@@ -50,34 +50,24 @@ int strneq_ci(const char* str1, const char* str2, size_t n)
 
 void trim_left(char* str)
 {
-    size_t len;
-    size_t first_nb;
-    size_t cur;
-    int    br = 0;
+    ssize_t len;
+    ssize_t first_nb;
+    ssize_t cur;
+    int     br = 0;
 
 #ifdef DEBUG
     printf("DEBUG trim_left before: `%s`\n", str);
 #endif
 
-    len = strlen(str);
+    len = (ssize_t)strlen(str);
     for (first_nb = 0; !br && str[first_nb]; ++first_nb)
-    {
-        switch (str[first_nb])
-        {
-        case ' ':
-        case '\t':
-        case '\n':
-        case '\r':
-            br = 0;
-            break;
-        default:
+        if (str[first_nb] > 32)
             br = 1;
-        }
-    }
 
     --first_nb;
-    for (cur = 0; cur <= len - first_nb; ++cur)
-        str[cur] = str[cur + first_nb];
+    if (first_nb >= 0)
+        for (cur = 0; cur <= len - first_nb; ++cur)
+            str[cur] = str[cur + first_nb];
 
 #ifdef DEBUG
     printf("DEBUG trim_left after: `%s`\n", str);
@@ -93,20 +83,11 @@ void trim_right(char* str)
 #endif
 
     for (len = strlen(str); len > 0; --len)
-    {
-        switch (str[len - 1])
-        {
-        case ' ':
-        case '\t':
-        case '\n':
-        case '\r':
+        if (str[len - 1] <= 32)
             str[len - 1] = '\0';
-            break;
-        default:
+        else
             /* Combined with --len at for declaration will break the loop */
             len = 1;
-        }
-    }
 
 #ifdef DEBUG
     printf("DEBUG trim_right after: `%s`\n", str);

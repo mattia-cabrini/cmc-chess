@@ -1056,6 +1056,10 @@ int board_under_check_mate_part(board_p B, coord_p king)
 
     res = 0;
 
+    /* If the king is not on the board (custom game / learning / or debug) */
+    if (board_coord_out_of_bound(king))
+        return 0;
+
     for (src.row = 0; !res && src.row < 8; ++src.row)
         for (src.col = 0; !res && src.col < 8; ++src.col)
             if (board_get_at(B, &src) != cpEEMPTY &&
