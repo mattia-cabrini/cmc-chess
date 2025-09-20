@@ -9,8 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define TO_UPPER_MASK 0xDF
-
 /* Data needed to restore a board from a simulated move */
 typedef struct simul_restore_t
 {
@@ -95,8 +93,6 @@ static size_t
 board_list_KING_moves(board_p, coord_p src, coord_p dst, size_t n);
 
 static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
-
-static int coord_eq(coord_p A, coord_p B);
 
 static const char* board_colour(coord_p C);
 
@@ -476,12 +472,6 @@ static const char* board_is_illegal_KING_move(board_p B, move_p M)
     return NULL;
 }
 
-void coord_init_by_str(coord_p C, const char* str)
-{
-    C->col = (myint8_t)((str[0] & TO_UPPER_MASK) - 'A');
-    C->row = (myint8_t)(str[1] - '0' - 1);
-}
-
 static void move_set_offset(move_p M)
 {
     M->offset.row = (myint8_t)(M->dest.row - M->source.row);
@@ -591,26 +581,6 @@ void board_under_check_part(board_p B, coord_p king, coord_p whence)
                 return;
             }
         }
-}
-
-void coord_to_str(coord_p C, char* buf, size_t n)
-{
-    if (n < 2)
-        return;
-
-    if (board_coord_out_of_bound(C))
-    {
-        buf[0] = '#';
-        buf[1] = '#';
-        return;
-    }
-
-    sprintf(buf, "%c%d", 'A' + C->col, C->row + 1);
-}
-
-static int coord_eq(coord_p A, coord_p B)
-{
-    return A->row == B->row && A->col == B->col;
 }
 
 int board_dump(board_p B, FILE* fp)

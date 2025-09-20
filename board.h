@@ -7,22 +7,11 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "coord.h"
 #include "int.h"
 #include "piece.h"
 
 #define GAME_MAX_MOVE_FOR_ONE_PIECE 28
-
-typedef struct coord_t
-{
-    myint8_t row;
-    myint8_t col;
-}* coord_p;
-
-typedef struct abs_coord_t
-{
-    myuint8_t row;
-    myuint8_t col;
-}* abs_coord_p;
 
 typedef struct board_t
 {
@@ -112,8 +101,5 @@ extern int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n);
  */
 extern void move_init(move_p M, const char* str, size_t n);
 extern int  board_coord_out_of_bound(coord_p);
-
-extern void coord_init_by_str(coord_p C, const char* str);
-extern void coord_to_str(coord_p C, char* buf, size_t n);
 
 #endif /* CMC_CHESS_BOARD_H */
