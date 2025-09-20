@@ -33,6 +33,7 @@ enum
     /* Equal Command */
     GE_CLEAR,
     GE_SET,
+    GE_ASSERT,
 
     /* Play */
     GP_MOVE

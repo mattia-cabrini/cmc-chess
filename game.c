@@ -8,6 +8,7 @@
 
 #include "board.h"
 #include "game.h"
+#include "game_assert.h"
 #include "util.h"
 
 static void game_refresh(game_p G);
@@ -30,6 +31,7 @@ static void game_comm_dot_restore(game_p G);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
+static void game_comm_eq_assert(game_p G);
 
 static void game_comm_qm_list(game_p G);
 
@@ -86,6 +88,9 @@ void game_run(game_p G)
             break;
         case GE_SET:
             game_comm_eq_set(G);
+            break;
+        case GE_ASSERT:
+            game_comm_eq_assert(G);
             break;
         case GP_MOVE:
             game_comm_play_move(G);
@@ -149,6 +154,11 @@ static void game_decode_command(game_p G)
         if (strneq_ci(G->comm_buf + 1, "set", 3))
         {
             G->comm_type = GE_SET;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "assert", 6))
+        {
+            G->comm_type = GE_ASSERT;
             return;
         }
         break;
@@ -511,4 +521,16 @@ static void game_refresh(game_p G)
 
     board_print(&G->board);
     game_msg_flush(&G->message);
+}
+
+static void game_comm_eq_assert(game_p G)
+{
+    struct game_assert_t A;
+    char                 err[256];
+
+    /* C->comm_buf + 7 = G->comm_buf + len of "=assert" */
+    game_assert_parse(&A, G->comm_buf + 7, err, sizeof(err));
+
+    if (A.kind == ASSERT_KIND_UNKNOWN)
+        game_msg_append(&G->message, err);
 }
