@@ -11,6 +11,12 @@
 
 #define TO_UPPER_MASK 0xDF
 
+/* Data needed to restore a board from a simulated move */
+typedef struct simul_restore_t
+{
+    piece_t o_dst;
+}* simul_restore_p;
+
 const piece_t DEFAULT_BOARD[] = {
     cpBROOK,  cpBKNIGHT, cpBBISHOP, cpBKING,  cpBQUEEN, cpBBISHOP, cpBKNIGHT,
     cpBROOK,  cpBPAWN,   cpBPAWN,   cpBPAWN,  cpBPAWN,  cpBPAWN,   cpBPAWN,
@@ -92,6 +98,18 @@ static const char* board_check_move_direction(board_p B, move_p M, turn_t turn);
 static int coord_eq(coord_p A, coord_p B);
 
 static const char* board_colour(coord_p C);
+
+/* Initialize R and simulate src->dst on B
+ *
+ * WARNING
+ * No check on src->dst validity.
+ */
+static void
+board_simulation_do(board_p B, simul_restore_p R, coord_p src, coord_p dst);
+
+/* Restore B effectively ending a simulation, using R info */
+static void
+board_simulation_undo(board_p B, simul_restore_p R, coord_p src, coord_p dst);
 
 piece_t board_get_at(board_p B, coord_p C)
 {
@@ -930,7 +948,75 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
     case cpWKING:
     case cpBKING:
         return (int)board_list_KING_moves(B, src, dst, n);
+    case cpEEMPTY:
+        return 0;
     }
 
     return -1;
+}
+
+piece_t
+board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence)
+{
+    struct simul_restore_t simulation_data;
+    piece_t                res;
+
+    res = cpEEMPTY;
+
+    board_simulation_do(B, &simulation_data, src, dst);
+
+    whence->row = -1;
+
+    board_under_check_part(B, &B->wking, whence);
+
+    if (whence->row == -1)
+        board_under_check_part(B, &B->bking, whence);
+    else
+        res = cpWKING;
+
+    if (whence->row != -1)
+        res = cpBKING;
+
+    board_simulation_undo(B, &simulation_data, src, dst);
+
+    return res;
+}
+
+static void
+board_simulation_do(board_p B, simul_restore_p R, coord_p src, coord_p dst)
+{
+    R->o_dst = board_get_at(B, dst);
+    board_set_at(B, dst, board_get_at(B, src));
+    board_set_at(B, src, cpEEMPTY);
+
+    if (R->o_dst == cpWKING)
+        B->wking.row = B->wking.col = -1;
+
+    if (R->o_dst == cpBKING)
+        B->bking.row = B->bking.col = -1;
+
+    if (board_get_at(B, dst) == cpWKING)
+        B->wking = *dst;
+
+    if (board_get_at(B, dst) == cpBKING)
+        B->bking = *dst;
+}
+
+static void
+board_simulation_undo(board_p B, simul_restore_p R, coord_p src, coord_p dst)
+{
+    board_set_at(B, src, board_get_at(B, dst));
+    board_set_at(B, dst, R->o_dst);
+
+    if (R->o_dst == cpWKING)
+        B->wking = *dst;
+
+    if (R->o_dst == cpBKING)
+        B->bking = *dst;
+
+    if (board_get_at(B, src) == cpWKING)
+        B->wking = *src;
+
+    if (board_get_at(B, dst) == cpBKING)
+        B->bking = *src;
 }

@@ -75,6 +75,19 @@ extern void board_exec(board_p B, move_p M);
  */
 extern void board_under_check_part(board_p B, coord_p king, coord_p whence);
 
+/* Check if the parameter king would be under check and sets whence.
+ *
+ * WARNING
+ * - Whence is set if king is under check. It otherwise returns in an invalid
+ *   state.
+ * - No check is made to assess whether or not src->dst is a valid move.
+ *
+ * RETURN
+ * The king that would be under check or cpEEMPTY.
+ */
+extern piece_t
+board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence);
+
 extern int board_dump(board_p B, FILE* fp);
 extern int board_restore(board_p B, FILE* fp);
 

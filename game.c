@@ -43,6 +43,9 @@ void game_run(game_p G)
     {
         clear();
 
+        putchar('\n');
+        printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
+
         board_print(&G->board);
         game_msg_flush(&G->message);
 
@@ -285,6 +288,9 @@ static void game_comm_qm_list(game_p G)
     int            ncord;
     char           buf[3];
 
+    piece_t        king_under_check;
+    struct coord_t whence;
+
     coord_init_by_str(&src, G->comm_buf + 1);
     if (board_coord_out_of_bound(&src))
     {
@@ -296,13 +302,38 @@ static void game_comm_qm_list(game_p G)
 
     if (ncord == 0)
         game_msg_vappend(&G->message, "! No move\n", NULL);
-
-    if (ncord == -1 || ncord > GAME_MAX_MOVE_FOR_ONE_PIECE)
+    else if (ncord == -1 || ncord > GAME_MAX_MOVE_FOR_ONE_PIECE)
         game_msg_vappend(&G->message, "! ERR\n", NULL);
-
-    for (cur = 0; cur < ncord; ++cur)
+    else
     {
-        coord_to_str(DST + cur, buf, sizeof(buf));
-        game_msg_vappend(&G->message, "> ", buf, "\n", NULL);
+        for (cur = 0; cur < ncord; ++cur)
+        {
+            coord_to_str(DST + cur, buf, sizeof(buf));
+
+            king_under_check =
+                board_under_check_part_w(&G->board, &src, DST + cur, &whence);
+            if (king_under_check == cpEEMPTY)
+            {
+                game_msg_vappend(&G->message, "> ", buf, "\n", NULL);
+            }
+            else if ((king_under_check ^ G->turn) > 0)
+            {
+                game_msg_vappend(
+                    &G->message,
+                    "! ",
+                    buf,
+                    " NO GO would get under check by ",
+                    NULL
+                );
+                coord_to_str(&whence, buf, sizeof(buf));
+                game_msg_vappend(&G->message, buf, "\n", NULL);
+            }
+            else
+            {
+                game_msg_vappend(
+                    &G->message, "> ", buf, " would check\n", NULL
+                );
+            }
+        }
     }
 }
