@@ -970,12 +970,16 @@ board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence)
     board_under_check_part(B, &B->wking, whence);
 
     if (whence->row == -1)
+    {
         board_under_check_part(B, &B->bking, whence);
-    else
-        res = cpWKING;
 
-    if (whence->row != -1)
-        res = cpBKING;
+        if (whence->row != -1)
+            res = cpBKING;
+    }
+    else
+    {
+        res = cpWKING;
+    }
 
     board_simulation_undo(B, &simulation_data, src, dst);
 

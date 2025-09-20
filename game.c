@@ -10,6 +10,8 @@
 #include "game.h"
 #include "util.h"
 
+static void game_refresh(game_p G);
+
 static void game_msg_init(game_msg_p E);
 static void game_msg_append(game_msg_p E, const char* str);
 static void game_msg_vappend(game_msg_p E, ...);
@@ -43,11 +45,7 @@ void game_run(game_p G)
     {
         clear();
 
-        putchar('\n');
-        printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
-
-        board_print(&G->board);
-        game_msg_flush(&G->message);
+        game_refresh(G);
 
         do
         {
@@ -336,4 +334,34 @@ static void game_comm_qm_list(game_p G)
             }
         }
     }
+}
+
+static void game_refresh(game_p G)
+{
+    struct coord_t whence;
+    char           buf[3];
+
+    whence.row = -1;
+    putchar('\n');
+
+    board_under_check_part(&G->board, &G->board.wking, &whence);
+    if (whence.row != -1)
+    {
+        coord_to_str(&whence, buf, sizeof(buf));
+        printf("WHITE King is under check by %s!\n", buf);
+    }
+    else
+    {
+        board_under_check_part(&G->board, &G->board.bking, &whence);
+        if (whence.row != -1)
+        {
+            coord_to_str(&whence, buf, sizeof(buf));
+            printf("BLACK King is under check by %s!\n", buf);
+        }
+    }
+
+    printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
+
+    board_print(&G->board);
+    game_msg_flush(&G->message);
 }
