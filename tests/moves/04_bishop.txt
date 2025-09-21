@@ -1,0 +1,30 @@
+=clear
+
+=set C3 4
+=set F6 -1
+=set A1 1
+=set E1 1
+=set A5 -1
+
+=assert piece-can-move src=C3 dst=B2
+=assert piece-can-move src=C3 dst=A1 rev=1
+
+=assert piece-can-move src=C3 dst=D4
+=assert piece-can-move src=C3 dst=E5
+=assert piece-can-move src=C3 dst=F6
+=assert piece-can-move src=C3 dst=G7 rev=1
+=assert piece-can-move src=C3 dst=H8 rev=1
+
+=assert piece-can-move src=C3 dst=E1 rev=1
+=assert piece-can-move src=C3 dst=D2
+
+=assert piece-can-move src=C3 dst=B4
+=assert piece-can-move src=C3 dst=A5
+
+=assert piece-can-move src=C3 dst=D3 rev=1
+=assert piece-can-move src=C3 dst=B3 rev=1
+=assert piece-can-move src=C3 dst=C2 rev=1
+=assert piece-can-move src=C3 dst=C5 rev=1
+
+quit
+

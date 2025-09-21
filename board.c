@@ -303,7 +303,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
         else
         {
             /* Take over */
-            ko = ko || (M->abs_offset.row > 1);
+            ko = ko || (M->abs_offset.row != 1);
             ko = ko || (dest_piece == cpEEMPTY);
         }
     }
@@ -330,7 +330,7 @@ static const char* board_is_illegal_PAWN_move(board_p B, move_p M)
         else
         {
             /* Take over */
-            ko = ko || (M->abs_offset.row > 1);
+            ko = ko || (M->abs_offset.row != 1);
             ko = ko || (dest_piece == cpEEMPTY);
         }
     }
