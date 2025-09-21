@@ -21,17 +21,17 @@ int main(int argc, char** argv)
     }
     else if (game.done == GAME_DONE_ASSERT_FAILED)
     {
-        fprintf(stderr, "Error: %s\n.", game.done);
+        fprintf(stderr, "Error: %s.\n", game.done);
         return 2;
     }
     else if (game.done == GAME_DONE_ASSERT_PARSE)
     {
-        fprintf(stderr, "Error: %s\n.", game.done);
+        fprintf(stderr, "Error: %s.\n", game.done);
         return 3;
     }
     else
     {
-        fprintf(stderr, "Error: %s\n.", game.done);
+        fprintf(stderr, "Error: %s.\n", game.done);
         return 1;
     }
 

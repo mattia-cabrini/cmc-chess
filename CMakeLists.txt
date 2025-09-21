@@ -12,6 +12,7 @@ if (NOT CLANG_FORMAT_EXECUTABLE)
   message(FATAL_ERROR "clang-format not found.")
 endif()
 
+enable_testing()
 string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
 
 set(CMAKE_C_FLAGS_RELEASE "")
@@ -159,3 +160,25 @@ add_custom_command(
 
 add_custom_target(fmt DEPENDS ${FORMAT_STAMP})
 add_dependencies(cmc-chess fmt)
+
+set(TEST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+
+file(GLOB_RECURSE TEST_FILES
+     CONFIGURE_DEPENDS
+     "${TEST_ROOT}/*")
+
+foreach(test_path IN LISTS TEST_FILES)
+  if(IS_DIRECTORY "${test_path}")
+    continue()
+  endif()
+
+  file(RELATIVE_PATH rel "${TEST_ROOT}" "${test_path}")
+  string(REPLACE "/" "." name "${rel}")
+  set(test_name "cmc-chess-test.${name}")
+
+  add_test(
+    NAME    "${test_name}"
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmc-chess-test.sh" "${test_path}"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+  )
+endforeach()

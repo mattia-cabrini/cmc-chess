@@ -1,13 +1,8 @@
 #!/bin/bash
 
-find "$1" -type f -name "*.txt" | while read fp; do
-	echo -n "Testing $fp"
-	./cmc-chess < "$fp" &> /dev/null
-
-	if [[ $? -eq 0 ]]; then
-		echo " ...OK"
-	else
-		echo " ...FAILED with code $?"
-		exit
-	fi
-done
+if [ -f "$1" ]; then
+	./cmc-chess < "$1" > /dev/null
+else
+	echo "$1 is not a file"
+	exit -1
+fi
