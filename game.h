@@ -21,6 +21,7 @@
 enum
 {
     GX_UNKNOWN,
+    GX_IGNORE,
 
     /* Dot Command */
     GD_NEW,

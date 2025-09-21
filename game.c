@@ -97,6 +97,8 @@ void game_run(game_p G)
         case GP_MOVE:
             game_comm_play_move(G);
             break;
+        case GX_IGNORE:
+            break;
         }
     }
 }
@@ -125,6 +127,11 @@ static void game_decode_command(game_p G)
     if (streq_ci(G->comm_buf, "quit"))
     {
         G->done = GAME_DONE_COMM_QUIT;
+        return;
+    }
+    else if (streq_ci(G->comm_buf, ""))
+    {
+        G->comm_type = GX_IGNORE;
         return;
     }
 

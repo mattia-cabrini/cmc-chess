@@ -1,0 +1,9 @@
+.new
+=assert piece-can-move src=A7 dst=A6
+=assert piece-can-move src=A7 dst=A5
+a7a5
+=assert piece-can-move src=A5 dst=A4 turn=1
+b2b4
+=assert piece-can-move src=A5 dst=B4
+quit
+
