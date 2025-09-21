@@ -20,9 +20,12 @@ enum
 
 typedef struct game_assert_t
 {
-    int            kind;
-    piece_t        piece;
-    turn_t         turn;
+    int kind;
+    int rev; /* 0 (default): assertion must pass; 1: assertion must fail */
+
+    piece_t piece;
+    turn_t  turn;
+
     struct coord_t src;
     struct coord_t dst;
     struct coord_t whence;

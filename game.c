@@ -536,6 +536,7 @@ static void game_comm_eq_assert(game_p G)
 {
     struct game_assert_t A;
     char                 err[256];
+    int                  positive_result;
 
     A.turn = G->turn;
 
@@ -546,8 +547,11 @@ static void game_comm_eq_assert(game_p G)
     {
         game_msg_append(&G->message, err);
         G->done = GAME_DONE_ASSERT_PARSE;
+        return;
     }
-    else if (!board_assert(&G->board, &A))
+
+    positive_result = board_assert(&G->board, &A);
+    if ((A.rev && positive_result) || (!A.rev && !positive_result))
     {
         G->done = GAME_DONE_ASSERT_FAILED;
     }

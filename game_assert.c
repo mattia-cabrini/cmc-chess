@@ -70,6 +70,8 @@ void game_assert_parse(
     A->dst.row    = -1;
     A->whence.row = -1;
 
+    A->rev        = 0;
+
     str           = parse_kind_string(A, str);
     if (A->kind == ASSERT_KIND_UNKNOWN)
     {
@@ -118,6 +120,13 @@ void game_assert_parse(
         {
             str     = parse_piece(&tmp, str);
             A->turn = (turn_t)tmp;
+            if (str == NULL)
+                strncpy(err, "could not read turn", err_length);
+        }
+        else if (streq_ci(attr_name, "rev"))
+        {
+            str    = parse_piece(&tmp, str);
+            A->rev = (turn_t)tmp;
             if (str == NULL)
                 strncpy(err, "could not read turn", err_length);
         }
