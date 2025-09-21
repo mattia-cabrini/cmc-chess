@@ -19,9 +19,19 @@ int main(int argc, char** argv)
     {
         printf("Bye\n");
     }
+    else if (game.done == GAME_DONE_ASSERT_FAILED)
+    {
+        fprintf(stderr, "Error: %s\n.", game.done);
+        return 2;
+    }
+    else if (game.done == GAME_DONE_ASSERT_PARSE)
+    {
+        fprintf(stderr, "Error: %s\n.", game.done);
+        return 3;
+    }
     else
     {
-        fprintf(stderr, "Error: %s.", game.done);
+        fprintf(stderr, "Error: %s\n.", game.done);
         return 1;
     }
 

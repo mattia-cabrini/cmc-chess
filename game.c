@@ -37,6 +37,8 @@ static void game_comm_qm_list(game_p G);
 
 const char* GAME_DONE_COULD_NOT_READ_STDIN = "could not read stdin";
 const char* GAME_DONE_COMM_QUIT            = "closed by user";
+const char* GAME_DONE_ASSERT_FAILED        = "assert failed";
+const char* GAME_DONE_ASSERT_PARSE         = "could not parse assert";
 
 void game_init(game_p G)
 {
@@ -353,7 +355,7 @@ static void game_comm_eq_set(game_p G)
             game_msg_append(
                 &G->message,
                 "White King has been moved (there can only be one King for "
-                "each player"
+                "each player)"
             );
             board_set_at(&G->board, &G->board.wking, cpEEMPTY);
         }
@@ -368,7 +370,7 @@ static void game_comm_eq_set(game_p G)
             game_msg_append(
                 &G->message,
                 "Black King has been moved (there can only be one King for "
-                "each player"
+                "each player)"
             );
             board_set_at(&G->board, &G->board.bking, cpEEMPTY);
         }
@@ -528,11 +530,18 @@ static void game_comm_eq_assert(game_p G)
     struct game_assert_t A;
     char                 err[256];
 
+    A.turn = G->turn;
+
     /* C->comm_buf + 7 = G->comm_buf + len of "=assert" */
     game_assert_parse(&A, G->comm_buf + 7, err, sizeof(err));
 
     if (A.kind == ASSERT_KIND_UNKNOWN)
+    {
         game_msg_append(&G->message, err);
-    else
-        game_msg_append(&G->message, "parse ok, but not implemented, yet");
+        G->done = GAME_DONE_ASSERT_PARSE;
+    }
+    else if (!board_assert(&G->board, &A))
+    {
+        G->done = GAME_DONE_ASSERT_FAILED;
+    }
 }

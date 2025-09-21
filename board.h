@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "coord.h"
+#include "game_assert.h"
 #include "int.h"
 #include "piece.h"
 
@@ -101,5 +102,7 @@ extern int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n);
  */
 extern void move_init(move_p M, const char* str, size_t n);
 extern int  board_coord_out_of_bound(coord_p);
+
+extern int board_assert(board_p B, game_assert_p A);
 
 #endif /* CMC_CHESS_BOARD_H */

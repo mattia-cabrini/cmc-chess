@@ -13,13 +13,11 @@
 
 /* Read Assert Kind
  * - Move str to first not blank character;
- * - Read the assert kind as a string. That is a contiguous block of not blank
- *   characters of maximum size MAX_ATTR_NAME_LENGTH (including NUL terminator).
- *   Parsing stops at first blank character;
- * - If the assert kind as string is longer than MAX_ATTR_NAME_LENGTH, return
- *   NULL for it is an error condition.
+ * - Checks str against all possible values and set A->kind.
  *
  * If all goes well return a pointer to the next char to parse.
+ * An error condition can be detected by checking A->kind against
+ * ASSERT_KIND_UNKNOWN.
  */
 static const char* parse_kind_string(game_assert_p A, const char* str);
 
@@ -36,10 +34,10 @@ static const char* parse_kind_string(game_assert_p A, const char* str);
 static const char*
 parse_attribute_name(const char* str, char* attr_name, size_t attr_name_n);
 
-/* Read Piece
+/* Read Piece or Turn
  * - Move str to first not blank character;
- * - Read the piece. That is at most two characters in the form `[-]\d` and it
- *   represents a number in the range [-6, 6].
+ * - Read the piece or turn. That is at most two characters in the form `[-]\d`
+ *   and it represents a number in the range [-6, 6].
  *   - If the first character is '-' the parser reads two characters.
  *   - Otherwise it reads one character.
  * - Return NULL if the first char is NUL;
@@ -48,7 +46,7 @@ parse_attribute_name(const char* str, char* attr_name, size_t attr_name_n);
  *
  * If all goes well return a pointer to the next char to parse.
  */
-static const char* parse_piece(game_assert_p A, const char* str);
+static const char* parse_piece(int* n, const char* str);
 
 /* Read Coordidates
  * - Move str to first not blank character;
@@ -66,8 +64,13 @@ void game_assert_parse(
 )
 {
     char attr_name[MAX_ATTR_NAME_LENGTH];
+    int  tmp; /* For piece and turn */
 
-    str = parse_kind_string(A, str);
+    A->src.row    = -1;
+    A->dst.row    = -1;
+    A->whence.row = -1;
+
+    str           = parse_kind_string(A, str);
     if (A->kind == ASSERT_KIND_UNKNOWN)
     {
         strncpy(err, "could not parse assert kind", err_length);
@@ -98,11 +101,25 @@ void game_assert_parse(
             if (str == NULL)
                 strncpy(err, "could not read destination", err_length);
         }
+        else if (streq_ci(attr_name, "whence"))
+        {
+            str = parse_coord(&A->whence, str);
+            if (str == NULL)
+                strncpy(err, "could not read destination", err_length);
+        }
         else if (streq_ci(attr_name, "piece"))
         {
-            str = parse_piece(A, str);
+            str      = parse_piece(&tmp, str);
+            A->piece = (piece_t)tmp;
             if (str == NULL)
                 strncpy(err, "could not read piece", err_length);
+        }
+        else if (streq_ci(attr_name, "turn"))
+        {
+            str     = parse_piece(&tmp, str);
+            A->turn = (turn_t)tmp;
+            if (str == NULL)
+                strncpy(err, "could not read turn", err_length);
         }
     }
 
@@ -114,10 +131,10 @@ static const char* parse_kind_string(game_assert_p A, const char* str)
 {
     str = move_to_not_blank(str);
 
-    if (strneq_ci(str, "check", 5))
+    if (strneq_ci(str, "piece-can-move", 14))
     {
-        A->kind = ASSERT_KIND_CHECK;
-        str += 5;
+        A->kind = ASSERT_KIND_PIECE_CAN_MOVE;
+        str += 14;
     }
     else if (strneq_ci(str, "checkmate", 9))
     {
@@ -129,10 +146,10 @@ static const char* parse_kind_string(game_assert_p A, const char* str)
         A->kind = ASSERT_KIND_PIECE_IS;
         str += 8;
     }
-    else if (strneq_ci(str, "piece-can-move", 14))
+    else if (strneq_ci(str, "check", 5))
     {
-        A->kind = ASSERT_KIND_PIECE_CAN_MOVE;
-        str += 14;
+        A->kind = ASSERT_KIND_CHECK;
+        str += 5;
     }
     else
     {
@@ -166,7 +183,7 @@ parse_attribute_name(const char* str, char* attr_name, size_t attr_name_n)
     return NULL;
 }
 
-static const char* parse_piece(game_assert_p A, const char* str)
+static const char* parse_piece(int* n, const char* str)
 {
     char   buf[3] = {0, 0, 0};
     size_t cur;
@@ -182,9 +199,9 @@ static const char* parse_piece(game_assert_p A, const char* str)
 
     buf[cur++] = *(str++);
 
-    A->piece   = (piece_t)atoi(buf);
+    *n         = (piece_t)atoi(buf);
 
-    if (piece_to_char(A->piece) == 'E')
+    if (piece_to_char((piece_t)*n) == 'E')
         return NULL; /* Invalid piece */
 
     return str;

@@ -4,8 +4,9 @@
 #ifndef CMC_CHESS_GAME_ASSERT_H
 #define CMC_CHESS_GAME_ASSERT_H
 
-#include "board.h"
+#include "coord.h"
 #include "int.h"
+#include "piece.h"
 
 enum
 {
@@ -21,8 +22,10 @@ typedef struct game_assert_t
 {
     int            kind;
     piece_t        piece;
+    turn_t         turn;
     struct coord_t src;
     struct coord_t dst;
+    struct coord_t whence;
 }* game_assert_p;
 
 extern void game_assert_parse(

@@ -62,6 +62,8 @@ typedef struct game_t
 
 extern const char* GAME_DONE_COULD_NOT_READ_STDIN;
 extern const char* GAME_DONE_COMM_QUIT;
+extern const char* GAME_DONE_ASSERT_FAILED;
+extern const char* GAME_DONE_ASSERT_PARSE;
 
 extern void game_init(game_p);
 extern void game_run(game_p);

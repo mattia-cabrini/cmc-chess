@@ -1038,3 +1038,61 @@ int board_under_check_mate_part(board_p B, coord_p king)
 
     return !res;
 }
+
+int board_assert(board_p B, game_assert_p A)
+{
+    struct coord_t whence;
+    struct move_t  M;
+    const char*    err;
+
+    switch (A->kind)
+    {
+    case ASSERT_KIND_CHECK:
+        whence.row = -1;
+        board_under_check_part(B, &A->src, &whence);
+        if (whence.row != -1)
+        {
+            if (!board_coord_out_of_bound(&A->whence))
+                return coord_eq(&A->whence, &whence);
+            else
+                return 1;
+        }
+
+        break;
+    case ASSERT_KIND_CHECKMATE:
+        if (board_under_check_mate_part(B, &A->src))
+            return 1;
+        break;
+    case ASSERT_KIND_PIECE_IS:
+        if (!board_coord_out_of_bound(&A->src) &&
+            board_get_at(B, &A->src) == A->piece)
+            return 1;
+        break;
+    case ASSERT_KIND_PIECE_CAN_MOVE:
+        if (!board_coord_out_of_bound(&A->src) &&
+            !board_coord_out_of_bound(&A->dst))
+        {
+            M.source = A->src;
+            M.dest   = A->dst;
+
+            move_set_offset(&M);
+
+            err = board_check_move(B, &M, A->turn, &whence);
+
+            /* Can move: ok */
+            if (err == NULL)
+                return 1;
+
+            /* Cannot move:
+             * - If A->whence is set, check it against whence. The user is
+             *   trying to asses if check detection is correct;
+             * - If A->whence is not set, assert has failed.
+             */
+            else if (!board_coord_out_of_bound(&A->whence))
+                return coord_eq(&A->whence, &whence);
+        }
+        break;
+    }
+
+    return 0;
+}
