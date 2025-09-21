@@ -1033,7 +1033,7 @@ int board_under_check_mate_part(board_p B, coord_p king)
     for (src.row = 0; !res && src.row < 8; ++src.row)
         for (src.col = 0; !res && src.col < 8; ++src.col)
             if (board_get_at(B, &src) != cpEEMPTY &&
-                (board_get_at(B, &src) ^ board_get_at(B, king)) > 0)
+                (board_get_at(B, &src) ^ board_get_at(B, king)) >= 0)
                 res = board_can_move_nc(B, &src, king);
 
     return !res;
