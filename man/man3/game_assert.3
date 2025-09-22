@@ -1,0 +1,119 @@
+.\" Copyright (c) 2025 Mattia Cabrini
+.\" SPDX-License-Identifier: GFDL-1.3-only
+
+.TH game_assert 3 2025-09-22 "CMC-Chess Source Code Man-Pages pre-release"
+
+.SH NAME
+game_assert.h, game_assert.c, struct game_assert_t, game_assert_p \- Parse an assert command
+
+.SH SYNOPSIS
+
+.Bd
+\fB#include "game_assert.h"\fP
+.Ed
+.P
+.EX
+enum
+{
+    ASSERT_KIND_UNKNOWN, 
+
+    ASSERT_KIND_CHECK, 
+    ASSERT_KIND_CHECKMATE, 
+    ASSERT_KIND_PIECE_IS, 
+    ASSERT_KIND_PIECE_CAN_MOVE
+};
+.P
+typedef struct game_assert_t
+{
+    int kind;
+    int rev;
+
+    piece_t piece;
+    turn_t  turn;
+
+    struct coord_t src;
+    struct coord_t dst;
+    struct coord_t whence;
+}* game_assert_p;
+.P
+.B void game_assert_parse(game_assert_p A, const char* str, char* err, size_t err_length);
+.P
+static const char* parse_int(int* n, const char* str);
+static const char* parse_attribute_name(const char* str, char attr_name, size_t attr_name_n);
+static const char* parse_int(int* n, const char* str);
+
+.SH DESCRIPTION
+
+.P
+.BR "game_assert_parse()"
+attempts to parse
+.I  "str"
+, that is an assert command described in 
+.BR "game_assert(5)"
+. In case of error, 
+.I  "A->kind"
+is set to ASSERT_KIND_UNKNOWN.
+
+.P
+.BR "struct game_assert_t"
+.TP
+.B kind
+The kind of assert (see enum below): it tells what kind of check shall be performed, and therefore how other members shall be used.
+.TP
+.B rev
+If set to false the assertion MUST have positive match; If set to true the assertions is intended as 
+.I  "reversed"
+ and therefore MUST turn out as negative match.
+.TP
+.B piece
+In case of
+.B ASSERT_KIND_PIECE_IS
+.I piece
+indicates what must be matched in position
+.I src
+and it is ignored otherwise.
+.TP
+.B turn
+Override current turn. A positive value indicate to assume that it is WHITE turn; A negative value indicates to assume that it is BLACK turn; 0 is undefined behaviour.
+.TP
+.B src
+Source coordinates.
+.TP
+.B dst
+Destination coordinates.
+.TP
+.B whence
+In case of ASSERT_KIND_CHECK tells whence the king should be taken over; In case of ASSERT_KIND_PIECE_CAN_MOVE tells whence the kind should be taken over, hence implying the move must not be viable.
+
+.P
+.BR "The enum contains all types of asserts."
+.TP
+.B ASSERT_KIND_UNKNOWN
+A special kind that represent an error occurred at parse time.
+.TP
+.B ASSERT_KIND_CHECK
+To assert that a piece in under check. This assertion requires to specify:
+.I src
+to tell the King position;
+.I whence
+to tell whence the king shall be taken over. Note that if the king is under check by multiple pieces
+.I whence
+behaviour is undefined and therefore
+.I whence
+should not be specified.
+.TP
+.B ASSERT_KIND_CHECKMATE
+To assert that a King is under checkmate. This assertion requires to specify
+.I src
+to tell the position of the King.
+.TP
+.B ASSERT_KING_PIECE_IS
+To assert that a specific piece must be placed at certain coordinates. This assertion requires to specify:
+.I src
+to tell what cell to look at; and
+.I piece
+to tell what piece is expected (see piece.3).
+
+.SH SEE ALSO
+
+.B cmc-chess(6), game_assert(5), piece(3)

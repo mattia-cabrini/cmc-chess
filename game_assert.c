@@ -34,19 +34,18 @@ static const char* parse_kind_string(game_assert_p A, const char* str);
 static const char*
 parse_attribute_name(const char* str, char* attr_name, size_t attr_name_n);
 
-/* Read Piece or Turn
- * - Move str to first not blank character;
- * - Read the piece or turn. That is at most two characters in the form `[-]\d`
- *   and it represents a number in the range [-6, 6].
+/* Read An Integer
+ * - Move str to the first not blank character;
+ * - Read a piece, turn or a boolean. That is at most two characters in the
+ *   form `[-]\d`:
  *   - If the first character is '-' the parser reads two characters.
  *   - Otherwise it reads one character.
  * - Return NULL if the first char is NUL;
  * - Return NULL if the first char is '-' and the second character is NUL;
- * - Return NULL if the read characters does not transalate to an actual piece.
  *
  * If all goes well return a pointer to the next char to parse.
  */
-static const char* parse_piece(int* n, const char* str);
+static const char* parse_int(int* n, const char* str);
 
 /* Read Coordidates
  * - Move str to first not blank character;
@@ -111,21 +110,25 @@ void game_assert_parse(
         }
         else if (streq_ci(attr_name, "piece"))
         {
-            str      = parse_piece(&tmp, str);
+            str      = parse_int(&tmp, str);
             A->piece = (piece_t)tmp;
+
+            if (piece_to_char(A->piece) == 'E')
+                str = NULL;
+
             if (str == NULL)
                 strncpy(err, "could not read piece", err_length);
         }
         else if (streq_ci(attr_name, "turn"))
         {
-            str     = parse_piece(&tmp, str);
+            str     = parse_int(&tmp, str);
             A->turn = (turn_t)tmp;
             if (str == NULL)
                 strncpy(err, "could not read turn", err_length);
         }
         else if (streq_ci(attr_name, "rev"))
         {
-            str    = parse_piece(&tmp, str);
+            str    = parse_int(&tmp, str);
             A->rev = (turn_t)tmp;
             if (str == NULL)
                 strncpy(err, "could not read turn", err_length);
@@ -192,7 +195,7 @@ parse_attribute_name(const char* str, char* attr_name, size_t attr_name_n)
     return NULL;
 }
 
-static const char* parse_piece(int* n, const char* str)
+static const char* parse_int(int* n, const char* str)
 {
     char   buf[3] = {0, 0, 0};
     size_t cur;
@@ -209,9 +212,6 @@ static const char* parse_piece(int* n, const char* str)
     buf[cur++] = *(str++);
 
     *n         = (piece_t)atoi(buf);
-
-    if (piece_to_char((piece_t)*n) == 'E')
-        return NULL; /* Invalid piece */
 
     return str;
 }

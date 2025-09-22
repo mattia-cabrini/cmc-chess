@@ -1,0 +1,91 @@
+.\" Copyright (c) 2025 Mattia Cabrini
+.\" SPDX-License-Identifier: GFDL-1.3-only
+
+.TH piece 3 2025-09-22 "CMC-Chess Source Code Man-Pages pre-release"
+
+.SH NAME
+piece, piece_t, turn_t \- Constants and data types to represent pieces and turn.
+
+.SH SYNOPSIS
+
+.Bd
+\fB#include "piece.h"\fP
+.Ed
+
+.EX
+.B typedef myin8_t piece_t
+.B typedef piece_t turn_t
+
+.B #define cpEEMPTY ((piece_t)0)
+.B #define cpWPAWN ((piece_t)1)
+.B #define cpWROOK ((piece_t)2)
+.B #define cpWKNIGHT ((piece_t)3)
+.B #define cpWBISHOP ((piece_t)4)
+.B #define cpWQUEEN ((piece_t)5)
+.B #define cpWKING ((piece_t)6)
+.B #define cpBPAWN ((piece_t)(-1))
+.B #define cpBROOK ((piece_t)(-2))
+.B #define cpBKNIGHT ((piece_t)(-3))
+.B #define cpBBISHOP ((piece_t)(-4))
+.B #define cpBQUEEN ((piece_t)(-5))
+.B #define cpBKING ((piece_t)(-6))
+
+.B extern const turn_t cpWTURN;
+.B extern const turn_t cpBTURN;
+
+.B extern const char* cpWHITES;
+.B extern const char* cpBLACKS;
+
+.B extern char piece_to_char(piece_t p);
+
+.SH DESCRIPTION
+
+.TP
+.B piece_t
+A data type that represent a chess piece (a rook, a knight, ...) and its colour. The color is defined by the sign of piece_t: <0 means BLACK; >0 means WHITE. The actual datatype is a signed 8 bit integer, as it is sufficient to store all possible combinations of pieces and colours. The value 0 indicates an empty cell.
+
+.TP
+.B turn_t
+A data type identical to piece_t that represents the turn.
+
+.TP
+.B cpW.....
+A definition for a WHITE piece.
+.TP
+.B cpB.....
+A definition for a BLACK piece.
+.TP
+.B cpEEMPTY
+A definition to represent an empty cell.
+
+.TP
+.B cpWTURN
+Represents the WHITE turn and it is the same as ~cpBTURN.
+.TP
+.B cpBTURN
+Represents the BLACK turn and it is the same as ~cpWTURN.
+
+.TP
+.B cpWHITES
+.nf
+An array of const characters are used to print a chess WHITE piece. A piece character shall be retrieved as:
+cpWHITES[cpW.....]
+.TP
+.B cpWHITES
+.nf
+An array of const characters are used to print a chess BLACK piece. A piece character shall be retrieved as:
+cpWHITES[cpW.....]
+
+.TP
+.B char piece_to_char(piece_t p)
+Converts
+.I p
+to a character using
+.B cpWHITES
+and
+.B cpBLACKS
+as described above.
+
+.SH SEE ALSO
+
+.B cmc-chess(6)
