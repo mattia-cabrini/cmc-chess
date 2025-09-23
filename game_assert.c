@@ -110,28 +110,33 @@ void game_assert_parse(
         }
         else if (streq_ci(attr_name, "piece"))
         {
-            str      = parse_int(&tmp, str);
-            A->piece = (piece_t)tmp;
+            str = parse_int(&tmp, str);
 
-            if (piece_to_char(A->piece) == 'E')
-                str = NULL;
+            if (str != NULL)
+            {
+                A->piece = (piece_t)tmp;
+                if (piece_to_char(A->piece) == 'E')
+                    str = NULL;
+            }
 
             if (str == NULL)
                 strncpy(err, "could not read piece", err_length);
         }
         else if (streq_ci(attr_name, "turn"))
         {
-            str     = parse_int(&tmp, str);
-            A->turn = (turn_t)tmp;
+            str = parse_int(&tmp, str);
             if (str == NULL)
                 strncpy(err, "could not read turn", err_length);
+            else
+                A->turn = (turn_t)tmp;
         }
         else if (streq_ci(attr_name, "rev"))
         {
-            str    = parse_int(&tmp, str);
-            A->rev = (turn_t)tmp;
+            str = parse_int(&tmp, str);
             if (str == NULL)
                 strncpy(err, "could not read turn", err_length);
+            else
+                A->rev = (turn_t)tmp;
         }
     }
 
