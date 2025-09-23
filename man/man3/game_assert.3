@@ -37,22 +37,31 @@ typedef struct game_assert_t
 }* game_assert_p;
 .P
 .B void game_assert_parse(game_assert_p A, const char* str, char* err, size_t err_length);
+
 .P
+.B Private
+static const char* parse_kind_string(game_assert_p A, const char* str);
 static const char* parse_int(int* n, const char* str);
 static const char* parse_attribute_name(const char* str, char attr_name, size_t attr_name_n);
 static const char* parse_int(int* n, const char* str);
+.P
+#define MAX_ATTR_NAME_LENGTH 16
 
 .SH DESCRIPTION
 
 .P
 .BR "game_assert_parse()"
 attempts to parse
-.I  "str"
-, that is an assert command described in 
-.BR "game_assert(5)"
-. In case of error, 
+.I str
+(an assert command described in 
+.BR game_assert(5)
+). In case of error, 
 .I  "A->kind"
-is set to ASSERT_KIND_UNKNOWN.
+is set to ASSERT_KIND_UNKNOWN and an error message is copied into
+.I err
+up to a maximum of
+.I err_length
+characters.
 
 .P
 .BR "struct game_assert_t"

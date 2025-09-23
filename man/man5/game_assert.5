@@ -1,21 +1,47 @@
 .\" Copyright (c) 2025 Mattia Cabrini
 .\" SPDX-License-Identifier: GFDL-1.3-only
 
-.TH game_assert 7 2025-09-22 "CMC-Chess Source Code Man-Pages pre-release"
+.TH game_assert 5 2025-09-23 "CMC-Chess Source Code Man-Pages pre-release"
 
 .SH NAME
 game_assert \- Assert command format.
 
 .SH SYNOPSIS
 
-=assert assert-kind src=XN dst=XN whence=XN piece=[-]N turn=[-]N
+=assert assert-kind-string src=XN dst=XN whence=XN piece=[-]N turn=[-]N rev=[-]N
 
 .P
-XN \- Coordinate literal (e.g. A1, B8, H3, ...)
+XN \- Coordinates literal (e.g. A1, B8, H3, ...)
 
 .P
 N \- A digit
 
+.SH DESCRIPTION
+
+.TP
+.B assert-kind-string
+Variable length string that represent an assert kind.
+
+.TP
+.B Coordinates literal
+A character in range ['A', 'H'], followed by a digit in range [1, 8]. It represent a chess board cell.
+
+.TP
+.B Integer value
+.I `piece`,
+.I `turn`
+and
+.I `rev`
+require an integer as value. Said integer must be a valid piece or turn specifier (see piece(3)). The format of the integer is therefore an optional '-', followed by a mandatory digit (e.g. "-1", "0", "6"). If the value begins with '-', a second character is allowed; If the value begins with a digits, a possible second character is not even considered, for it would not be compliant to the format "[-]\\d".
+
+.SH EXAMPLES
+
+.P
+=assert piece-is src=B7 piece=1
+
+.P
+=assert piece-can-move src=B7 dst=B3 turn=1 rev=1
+
 .SH SEE ALSO
 
-.B cmc-chess(6), game_assert(3)
+.B cmc-chess(6), game_assert(3), parse_attribute_name(3), parse_int(3), parse_coord(3), parse_kind_string(3), ascii(7), piece(3)

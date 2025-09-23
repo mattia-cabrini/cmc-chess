@@ -1,0 +1,47 @@
+.\" Copyright (c) 2025 Mattia Cabrini
+.\" SPDX-License-Identifier: GFDL-1.3-only
+
+.TH parse_coord 3 2025-09-23 "CMC-Chess Source Code Man-Pages pre-release"
+
+.SH NAME
+parse_coord \- Parse coordinates from assert command. 
+
+.SH SYNOPSIS
+
+static const char* parse_coord(coord_p A, const char* str);
+
+.SH DESCRIPTION
+
+Read coordinates literal from an assert command.
+
+.SH PARAMETERS
+
+.TP
+.B coord_p A
+See RETURN.
+
+.TP
+.B const char* str
+A pointer to the first character of the coordinates or to a block of blank characters placed before the coordinates.
+
+.SH RETURN
+
+.TP
+.B A
+It is set to the recognized coordinates. 
+
+.TP
+.B Actual return value
+A pointer to the next character to parse. NULL in case of error.
+
+.SH ERRORS
+
+.TP
+If the first character is NUL (see ascii(7)) NULL is returned.
+
+.TP
+If the second character is NUL NULL is returned.
+
+.SH SEE ALSO
+
+.B cmc-chess(6), game_assert(5), game_assert(3)

@@ -1,0 +1,47 @@
+.\" Copyright (c) 2025 Mattia Cabrini
+.\" SPDX-License-Identifier: GFDL-1.3-only
+
+.TH parse_int 3 2025-09-23 "CMC-Chess Source Code Man-Pages pre-release"
+
+.SH NAME
+parse_int \- Parse an int value from an assert command.
+
+.SH SYNOPSIS
+
+static const char* parse_int(int *n, const char* str);
+
+.SH DESCRIPTION
+
+Read an integer value from an assert command.
+
+.SH PARAMETERS
+
+.TP
+.B int* n
+See RETURN.
+
+.TP
+.B const char* str
+A pointer to the first character of the integer value or to a block of blank characters placed before the integer value.
+
+.SH RETURN
+
+.TP
+.B *n
+It is set to the recognized value.
+
+.TP
+.B Actual return value
+A pointer to the next character to parse. NULL in case of error.
+
+.SH ERRORS
+
+.TP
+If the first character is NUL (see ascii(7)) NULL is returned.
+
+.TP
+If the first character is '-' and the second character is NUL, NULL is returned.
+
+.SH SEE ALSO
+
+.B cmc-chess(6), game_assert(5), game_assert(3), ascii(7)
