@@ -1,54 +1,54 @@
 =clear
 
-=set B2 2
+=set B7 2
 
-=assert piece-can-move src=B2 dst=B1
-=assert piece-can-move src=B2 dst=B3
-=assert piece-can-move src=B2 dst=B4
-=assert piece-can-move src=B2 dst=B5
-=assert piece-can-move src=B2 dst=B6
-=assert piece-can-move src=B2 dst=B7
-=assert piece-can-move src=B2 dst=B8
-=assert piece-can-move src=B2 dst=A2
-=assert piece-can-move src=B2 dst=C2
-=assert piece-can-move src=B2 dst=D2
-=assert piece-can-move src=B2 dst=E2
-=assert piece-can-move src=B2 dst=F2
-=assert piece-can-move src=B2 dst=G2
-=assert piece-can-move src=B2 dst=H2
+=assert piece-can-move src=B7 dst=B8
+=assert piece-can-move src=B7 dst=B6
+=assert piece-can-move src=B7 dst=B5
+=assert piece-can-move src=B7 dst=B4
+=assert piece-can-move src=B7 dst=B3
+=assert piece-can-move src=B7 dst=B2
+=assert piece-can-move src=B7 dst=B1
+=assert piece-can-move src=B7 dst=A7
+=assert piece-can-move src=B7 dst=C7
+=assert piece-can-move src=B7 dst=D7
+=assert piece-can-move src=B7 dst=E7
+=assert piece-can-move src=B7 dst=F7
+=assert piece-can-move src=B7 dst=G7
+=assert piece-can-move src=B7 dst=H7
 
-=set E2 -1
+=set E7 -1
 
-=assert piece-can-move src=B2 dst=B1
-=assert piece-can-move src=B2 dst=B3
-=assert piece-can-move src=B2 dst=B4
-=assert piece-can-move src=B2 dst=B5
-=assert piece-can-move src=B2 dst=B6
-=assert piece-can-move src=B2 dst=B7
-=assert piece-can-move src=B2 dst=B8
-=assert piece-can-move src=B2 dst=A2
-=assert piece-can-move src=B2 dst=C2
-=assert piece-can-move src=B2 dst=D2
-=assert piece-can-move src=B2 dst=E2
-=assert piece-can-move src=B2 dst=F2 rev=1
-=assert piece-can-move src=B2 dst=G2 rev=1
+=assert piece-can-move src=B7 dst=B8
+=assert piece-can-move src=B7 dst=B6
+=assert piece-can-move src=B7 dst=B5
+=assert piece-can-move src=B7 dst=B4
+=assert piece-can-move src=B7 dst=B3
+=assert piece-can-move src=B7 dst=B2
+=assert piece-can-move src=B7 dst=B1
+=assert piece-can-move src=B7 dst=A7
+=assert piece-can-move src=B7 dst=C7
+=assert piece-can-move src=B7 dst=D7
+=assert piece-can-move src=B7 dst=E7
+=assert piece-can-move src=B7 dst=F7 rev=1
+=assert piece-can-move src=B7 dst=G7 rev=1
 
-=set E2 1
+=set E7 1
 
-=assert piece-can-move src=B2 dst=B1
-=assert piece-can-move src=B2 dst=B3
-=assert piece-can-move src=B2 dst=B4
-=assert piece-can-move src=B2 dst=B5
-=assert piece-can-move src=B2 dst=B6
-=assert piece-can-move src=B2 dst=B7
-=assert piece-can-move src=B2 dst=B8
-=assert piece-can-move src=B2 dst=A2
-=assert piece-can-move src=B2 dst=C2
-=assert piece-can-move src=B2 dst=D2
-=assert piece-can-move src=B2 dst=E2 rev=1
-=assert piece-can-move src=B2 dst=F2 rev=1
-=assert piece-can-move src=B2 dst=G2 rev=1
-=assert piece-can-move src=B2 dst=H2 rev=1
-=assert piece-can-move src=B2 dst=H2 rev=1
+=assert piece-can-move src=B7 dst=B8
+=assert piece-can-move src=B7 dst=B6
+=assert piece-can-move src=B7 dst=B5
+=assert piece-can-move src=B7 dst=B4
+=assert piece-can-move src=B7 dst=B3
+=assert piece-can-move src=B7 dst=B2
+=assert piece-can-move src=B7 dst=B1
+=assert piece-can-move src=B7 dst=A7
+=assert piece-can-move src=B7 dst=C7
+=assert piece-can-move src=B7 dst=D7
+=assert piece-can-move src=B7 dst=E7 rev=1
+=assert piece-can-move src=B7 dst=F7 rev=1
+=assert piece-can-move src=B7 dst=G7 rev=1
+=assert piece-can-move src=B7 dst=H7 rev=1
+=assert piece-can-move src=B7 dst=H7 rev=1
 
 quit

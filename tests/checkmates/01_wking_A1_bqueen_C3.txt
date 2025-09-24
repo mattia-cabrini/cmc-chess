@@ -1,9 +1,9 @@
 =clear
 
-=set A1 6
-=set A3 -5
-=set C1 -5
-=assert checkmate src=A1
+=set A8 6
+=set A6 -5
+=set C8 -5
+=assert checkmate src=A8
 
 quit
 

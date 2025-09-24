@@ -1,15 +1,15 @@
 .new
 
-=assert piece-can-move src=B8 dst=A6
-=assert piece-can-move src=B8 dst=C6
+=assert piece-can-move src=B1 dst=A3
+=assert piece-can-move src=B1 dst=C3
 
-=assert piece-can-move src=G8 dst=H6
-=assert piece-can-move src=G8 dst=F6
+=assert piece-can-move src=G1 dst=H3
+=assert piece-can-move src=G1 dst=F3
 
-h7h6
-=assert piece-can-move src=G8 dst=H6 turn=1 rev=1
+h2h3
+=assert piece-can-move src=G1 dst=H3 turn=1 rev=1
 
-=set H6 -1
-=assert piece-can-move src=G8 dst=H6 turn=1
+=set H3 -1
+=assert piece-can-move src=G1 dst=H3 turn=1
 
 quit

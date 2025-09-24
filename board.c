@@ -139,7 +139,7 @@ void board_print(board_p B)
 
     for (coord.row = 0; coord.row < 8; ++coord.row)
     {
-        printf("\n%d   ", coord.row + 1);
+        printf("\n%d   ", 8 - coord.row);
         for (coord.col = 0; coord.col < 8; ++coord.col)
         {
             piece_t p = board_get_at(B, &coord);

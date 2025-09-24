@@ -12,7 +12,7 @@
 void coord_init_by_str(coord_p C, const char* str)
 {
     C->col = (myint8_t)((str[0] & TO_UPPER_MASK) - 'A');
-    C->row = (myint8_t)(str[1] - '0' - 1);
+    C->row = (myint8_t)(8 - (str[1] - '0'));
 }
 
 void coord_to_str(coord_p C, char* buf, size_t n)
@@ -30,7 +30,7 @@ void coord_to_str(coord_p C, char* buf, size_t n)
         return;
     }
 
-    sprintf(buf, "%c%d", 'A' + C->col, C->row + 1);
+    sprintf(buf, "%c%d", 'A' + C->col, 8 - C->row);
 }
 
 int coord_eq(coord_p A, coord_p B)
