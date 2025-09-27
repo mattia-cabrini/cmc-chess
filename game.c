@@ -1,9 +1,7 @@
 /* Copyright (c) 2025 Mattia Cabrini      */
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
-#include <stdarg.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <string.h>
 
 #include "board.h"
@@ -12,12 +10,6 @@
 #include "util.h"
 
 static void game_refresh(game_p G);
-
-static void game_msg_init(game_msg_p E);
-static void game_msg_append(game_msg_p E, const char* str);
-static void game_msg_vappend(game_msg_p E, ...);
-static void game_msg_flush(game_msg_p E);
-static void game_msg_clear(game_msg_p E);
 
 static void game_read_command(game_p G);
 static void game_decode_command(game_p G);
@@ -390,43 +382,6 @@ static void game_comm_eq_set(game_p G)
 
     board_set_at(&G->board, &dst, (piece_t)piece);
 }
-
-static void game_msg_append(game_msg_p E, const char* str)
-{
-    while (E->cur < E->buf + sizeof(E->buf) - 1 && (*(E->cur++) = *str++))
-        ;
-
-    if (E->cur == E->buf + sizeof(E->buf) - 1)
-        *E->cur = '\0';
-    else
-        --E->cur; /* Next time \0 will be overwritten */
-}
-
-static void game_msg_flush(game_msg_p E)
-{
-    puts(E->buf);
-    game_msg_clear(E);
-}
-
-static void game_msg_clear(game_msg_p E)
-{
-    E->buf[0] = '\0';
-    E->cur    = E->buf;
-}
-
-static void game_msg_vappend(game_msg_p E, ...)
-{
-    const char* strx;
-    va_list     args;
-
-    va_start(args, E);
-    while ((strx = va_arg(args, const char*)) != NULL)
-        game_msg_append(E, strx);
-
-    va_end(args);
-}
-
-static void game_msg_init(game_msg_p E) { game_msg_clear(E); }
 
 static void game_comm_qm_list(game_p G)
 {

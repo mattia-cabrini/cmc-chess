@@ -5,17 +5,12 @@
 #define CMC_CHESS_GAME_H
 
 #include "board.h"
+#include "game_msg.h"
 
 #ifdef __AVR__
-
 #define GAME_COMMAND_LENGTH 64
-#define GAME_ERR_LENGTH 64
-
 #else
-
 #define GAME_COMMAND_LENGTH 256
-#define GAME_ERR_LENGTH 1024
-
 #endif
 
 enum
@@ -39,12 +34,6 @@ enum
     /* Play */
     GP_MOVE
 };
-
-typedef struct game_msg_t
-{
-    char  buf[GAME_ERR_LENGTH];
-    char* cur; /* Index of next writable char */
-}* game_msg_p;
 
 typedef struct game_t
 {
