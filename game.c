@@ -27,6 +27,7 @@ static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
 static void game_comm_dot_noclear(game_p G);
 static void game_comm_dot_save(game_p G, int force);
+static void game_comm_dot_comment(game_p G);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
@@ -45,7 +46,10 @@ void game_init(game_p G)
     game_msg_init(&G->message);
     G->turn      = cpWTURN;
     G->comm_type = GX_UNKNOWN;
+
     G->opts |= GOPT_CLEAR;
+    G->opts &= ~GOPT_IN_LOAD;
+
     board_init(&G->board);
 }
 
@@ -93,6 +97,10 @@ void game_run(game_p G)
             break;
         case GD_SAVE_FORCE:
             game_comm_dot_save(G, 1);
+            break;
+        case GD_COMMENT:
+            if (G->opts & GOPT_IN_LOAD)
+                game_comm_dot_comment(G);
             break;
         case GQ_LIST:
             game_comm_qm_list(G);
@@ -178,7 +186,13 @@ static void game_decode_command(game_p G)
             G->comm_type = GD_SAVE;
             return;
         }
+        if (strneq_ci(G->comm_buf + 1, ".", 1))
+        {
+            G->comm_type = GD_COMMENT;
+            return;
+        }
         break;
+
     case '=':
         if (strneq_ci(G->comm_buf + 1, "clear", 5))
         {
@@ -605,6 +619,11 @@ static void game_comm_dot_noclear(game_p G)
         G->opts &= ~GOPT_CLEAR;
     else
         G->opts |= GOPT_CLEAR;
+}
+
+static void game_comm_dot_comment(game_p G)
+{
+    game_msg_append(&G->message, G->comm_buf + 2);
 }
 
 #ifdef DEBUG

@@ -25,6 +25,7 @@ enum
     GD_NOCLEAR,
     GD_SAVE,
     GD_SAVE_FORCE,
+    GD_COMMENT, /* .. */
 
     /* Question Mark Command */
     GQ_LIST,
@@ -40,7 +41,8 @@ enum
 
 enum
 {
-    GOPT_CLEAR = 1
+    GOPT_CLEAR   = 1, /* 1: clear afet each command; 0: do not clear */
+    GOPT_IN_LOAD = 2  /* 1: load in progress; 0: load not in progress */
 };
 
 typedef struct game_t
