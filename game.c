@@ -1,6 +1,7 @@
 /* Copyright (c) 2025 Mattia Cabrini      */
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+#define _POSIX_C_SOURCE 200809L
 #include <errno.h>
 #include <stddef.h>
 #include <string.h>
