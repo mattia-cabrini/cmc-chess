@@ -24,4 +24,8 @@ extern void coord_init_by_str(coord_p C, const char* str);
 extern void coord_to_str(coord_p C, char* buf, size_t n);
 extern int  coord_eq(coord_p A, coord_p B);
 
+#ifdef DEBUG
+extern void coord_meminfo(void);
+#endif
+
 #endif /* CMC_CHESS_COORD_H */

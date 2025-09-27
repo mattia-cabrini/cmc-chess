@@ -6,6 +6,7 @@
 
 #include <stdarg.h>
 #include <stddef.h>
+#include <stdio.h>
 
 void game_msg_append(game_msg_p E, const char* str)
 {
@@ -62,3 +63,22 @@ void game_msg_vappend(game_msg_p E, ...)
 }
 
 void game_msg_init(game_msg_p E) { game_msg_clear(E); }
+
+#ifdef DEBUG
+void game_msg_meminfo(void)
+{
+    struct game_msg_t T;
+
+    printf("struct game_msg_t: %lu\n", sizeof(T));
+#if GAME_MSG_BUFFER_TYPE == GAME_MSG_BUFFER_TOTAL
+    printf(" buf:              %lu\n", sizeof(T.buf));
+    printf(" cur:              %lu\n", sizeof(T.cur));
+    printf(" ----------------- %lu\n", sizeof(T.buf) + sizeof(T.cur));
+#elif GAME_MSG_BUFFER_TYPE == GAME_MSG_BUFFER_NONE
+    printf(" nobuf:            %lu\n", sizeof(T.nobuf));
+    printf(" ----------------- %lu\n", sizeof(T.nobuf));
+#else
+#error "GAME_MSG_BUFFER_TYPE has got an illegal value"
+#endif
+}
+#endif

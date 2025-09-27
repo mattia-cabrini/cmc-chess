@@ -87,4 +87,8 @@ extern int board_coord_out_of_bound(coord_p);
 
 extern int board_assert(board_p B, game_assert_p A);
 
+#ifdef DEBUG
+extern void board_meminfo(void);
+#endif
+
 #endif /* CMC_CHESS_BOARD_H */

@@ -37,3 +37,15 @@ int coord_eq(coord_p A, coord_p B)
 {
     return A->row == B->row && A->col == B->col;
 }
+
+#ifdef DEBUG
+void coord_meminfo(void)
+{
+    struct coord_t T;
+
+    printf("struct coord_t: %lu\n", sizeof(T));
+    printf(" row:           %lu\n", sizeof(T.row));
+    printf(" col:           %lu\n", sizeof(T.col));
+    printf(" -------------- %lu\n", sizeof(T.row) + sizeof(T.col));
+}
+#endif

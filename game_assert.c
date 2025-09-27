@@ -240,3 +240,24 @@ static const char* parse_coord(coord_p C, const char* str)
 
     return str;
 }
+
+#ifdef DEBUG
+void game_assert_meminfo(void)
+{
+    struct game_assert_t T;
+
+    printf("struct game_assert_t: %lu\n", sizeof(T));
+    printf(" kind:                %lu\n", sizeof(T.kind));
+    printf(" rev:                 %lu\n", sizeof(T.rev));
+    printf(" piece:               %lu\n", sizeof(T.piece));
+    printf(" turn:                %lu\n", sizeof(T.turn));
+    printf(" src:                 %lu\n", sizeof(T.src));
+    printf(" dst:                 %lu\n", sizeof(T.dst));
+    printf(" whence:              %lu\n", sizeof(T.whence));
+    printf(
+        " -------------------- %lu\n",
+        sizeof(T.kind) + sizeof(T.rev) + sizeof(T.piece) + sizeof(T.turn) +
+            sizeof(T.src) + sizeof(T.dst) + sizeof(T.whence)
+    );
+}
+#endif

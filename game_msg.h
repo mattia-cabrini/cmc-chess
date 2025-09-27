@@ -5,9 +5,9 @@
 #define CMC_CHESS_GAME_MSG_H
 
 #ifdef __AVR__
-#define GAME_MSG_LENGTH 64
+#define GAME_MSG_LENGTH 120
 #else
-#define GAME_MSG_LENGTH 2048
+#define GAME_MSG_LENGTH 2040
 #endif
 
 #define GAME_MSG_BUFFER_NONE 1
@@ -34,5 +34,9 @@ extern void game_msg_append(game_msg_p E, const char* str);
 extern void game_msg_vappend(game_msg_p E, ...);
 extern void game_msg_flush(game_msg_p E);
 extern void game_msg_clear(game_msg_p E);
+
+#ifdef DEBUG
+extern void game_msg_meminfo(void);
+#endif
 
 #endif /* CMC_CHESS_GAME_MSG_H */

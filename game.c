@@ -528,3 +528,27 @@ static void game_comm_dot_noclear(game_p G)
     else
         G->opts |= GOPT_CLEAR;
 }
+
+#ifdef DEBUG
+void game_meminfo(void)
+{
+    struct game_t T;
+
+    printf("struct game_t: %lu\n", sizeof(T));
+    printf(" message:      %lu\n", sizeof(T.message));
+    printf(" comm_buf:     %lu\n", sizeof(T.comm_buf));
+    printf(" board:        %lu\n", sizeof(T.board));
+    printf(" comm_type:    %lu\n", sizeof(T.comm_type));
+    printf(" comm_move:    %lu\n", sizeof(T.comm_move));
+    printf(" done:         %lu\n", sizeof(T.done));
+    printf(" opts:         %lu\n", sizeof(T.opts));
+    printf(" turn:         %lu\n", sizeof(T.turn));
+    printf(" checkmate:    %lu\n", sizeof(T.checkmate));
+    printf(
+        " ------------- %lu\n",
+        sizeof(T.message) + sizeof(T.board) + sizeof(T.comm_buf) +
+            sizeof(T.done) + sizeof(T.turn) + sizeof(T.comm_type) +
+            sizeof(T.comm_move) + sizeof(T.checkmate) + sizeof(T.opts)
+    );
+}
+#endif

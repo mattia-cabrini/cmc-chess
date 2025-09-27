@@ -5,6 +5,8 @@
 #include "coord.h"
 #include "int.h"
 
+#include <stdio.h>
+
 void move_set_offset(move_p M)
 {
     M->offset.row = (myint8_t)(M->dest.row - M->source.row);
@@ -43,3 +45,21 @@ void move_init(move_p M, const char* str, size_t n)
 
     move_set_offset(M);
 }
+
+#ifdef DEBUG
+void move_meminfo(void)
+{
+    struct move_t T;
+
+    printf("struct move_t: %lu\n", sizeof(T));
+    printf(" source:       %lu\n", sizeof(T.source));
+    printf(" dest:         %lu\n", sizeof(T.dest));
+    printf(" offset:       %lu\n", sizeof(T.offset));
+    printf(" abs_offset:   %lu\n", sizeof(T.abs_offset));
+    printf(
+        " ------------- %lu\n",
+        sizeof(T.source) + sizeof(T.dest) + sizeof(T.offset) +
+            sizeof(T.abs_offset)
+    );
+}
+#endif

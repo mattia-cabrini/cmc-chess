@@ -1055,3 +1055,19 @@ int board_assert(board_p B, game_assert_p A)
 
     return 0;
 }
+
+#ifdef DEBUG
+void board_meminfo(void)
+{
+    struct board_t T;
+
+    printf("struct board_t: %lu\n", sizeof(T));
+    printf(" board:         %lu\n", sizeof(T.board));
+    printf(" wking:         %lu\n", sizeof(T.wking));
+    printf(" bking:         %lu\n", sizeof(T.bking));
+    printf(
+        " -------------- %lu\n",
+        sizeof(T.board) + sizeof(T.wking) + sizeof(T.bking)
+    );
+}
+#endif

@@ -44,18 +44,18 @@ enum
 typedef struct game_t
 {
     struct game_msg_t message;
-    struct board_t    board;
     char              comm_buf[GAME_COMMAND_LENGTH];
-
-    const char* done;
-    turn_t      turn;
+    struct board_t    board;
 
     int           comm_type;
     struct move_t comm_move;
 
-    turn_t checkmate;
+    const char* done;
 
     int opts;
+
+    turn_t turn;
+    turn_t checkmate;
 }* game_p;
 
 extern const char* GAME_DONE_COULD_NOT_READ_STDIN;
@@ -65,5 +65,9 @@ extern const char* GAME_DONE_ASSERT_PARSE;
 
 extern void game_init(game_p);
 extern void game_run(game_p);
+
+#ifdef DEBUG
+extern void game_meminfo(void);
+#endif
 
 #endif /* CMC_CHESS_GAME_H */

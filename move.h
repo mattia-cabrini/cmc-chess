@@ -32,4 +32,8 @@ typedef struct move_t
 extern void move_init(move_p M, const char* str, size_t n);
 extern void move_set_offset(move_p M);
 
+#ifdef DEBUG
+extern void move_meminfo(void);
+#endif
+
 #endif /* CMC_CHESS_MOVE_H */

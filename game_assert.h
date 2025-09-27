@@ -35,4 +35,8 @@ extern void game_assert_parse(
     game_assert_p A, const char* str, char* err, size_t err_length
 );
 
+#ifdef DEBUG
+extern void game_assert_meminfo(void);
+#endif
+
 #endif /* CMC_CHESS_GAME_ASSERT_H */
