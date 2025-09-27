@@ -82,7 +82,10 @@ board_under_check_part_w(board_p B, coord_p src, coord_p dst, coord_p whence);
 
 extern int board_under_check_mate_part(board_p B, coord_p king);
 
+/* Not using game_io: direct serialization */
 extern int board_dump(board_p B, FILE* fp);
+
+/* Not using game_io: direct serialization */
 extern int board_restore(board_p B, FILE* fp);
 
 extern int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n);

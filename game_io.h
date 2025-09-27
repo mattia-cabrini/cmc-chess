@@ -1,0 +1,13 @@
+/* Copyright (c) 2025 Mattia Cabrini      */
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+#ifndef CMC_CHESS_GAME_IO_H
+#define CMC_CHESS_GAME_IO_H
+
+extern void game_io_printf(const char* fmt, ...);
+extern void game_io_putc(int);
+extern void game_io_puts(const char*);
+
+extern int game_io_gets(char* str, int str_length);
+
+#endif /* CMC_CHESS_GAME_IO_H */

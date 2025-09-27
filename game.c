@@ -7,6 +7,7 @@
 #include "board.h"
 #include "game.h"
 #include "game_assert.h"
+#include "game_io.h"
 #include "util.h"
 
 static void game_refresh(game_p G);
@@ -51,7 +52,7 @@ void game_run(game_p G)
 
         do
         {
-            printf("Command: ");
+            game_io_printf("Command: ");
 
             game_read_command(G);
             game_decode_command(G);
@@ -60,7 +61,7 @@ void game_run(game_p G)
                 return;
 
             if (G->comm_type == GX_UNKNOWN)
-                printf("What did you just say?\n");
+                game_io_printf("What did you just say?\n");
         } while (G->comm_type == GX_UNKNOWN);
 
         switch (G->comm_type)
@@ -97,13 +98,7 @@ void game_run(game_p G)
 
 static void game_read_command(game_p G)
 {
-    char* control;
-
-    /* Does not take into account the terminal buffer */
-    fflush(stdin);
-    control = fgets(G->comm_buf, sizeof(G->comm_buf), stdin);
-
-    if (control == NULL)
+    if (!game_io_gets(G->comm_buf, sizeof(G->comm_buf)))
     {
         G->done = GAME_DONE_COULD_NOT_READ_STDIN;
         return;
@@ -453,7 +448,7 @@ static void game_refresh(game_p G)
     if (whence.row != -1)
     {
         coord_to_str(&whence, buf, sizeof(buf));
-        printf("WHITE King is under check by %s!\n", buf);
+        game_io_printf("WHITE King is under check by %s!\n", buf);
     }
     else
     {
@@ -461,19 +456,19 @@ static void game_refresh(game_p G)
         if (whence.row != -1)
         {
             coord_to_str(&whence, buf, sizeof(buf));
-            printf("BLACK King is under check by %s!\n", buf);
+            game_io_printf("BLACK King is under check by %s!\n", buf);
         }
     }
 
     if (board_under_check_mate_part(&G->board, &G->board.wking))
     {
         G->checkmate = cpWTURN;
-        printf("IT'S CHECKMATE PAL!\n");
+        game_io_printf("IT'S CHECKMATE PAL!\n");
     }
     else if (board_under_check_mate_part(&G->board, &G->board.bking))
     {
         G->checkmate = cpBTURN;
-        printf("IT'S CHECKMATE PAL!\n");
+        game_io_printf("IT'S CHECKMATE PAL!\n");
     }
     else
     {
@@ -481,7 +476,9 @@ static void game_refresh(game_p G)
     }
 
     if (G->checkmate == cpEEMPTY)
-        printf("It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK");
+        game_io_printf(
+            "It is %s turn.\n", G->turn == cpWTURN ? "WHITE" : "BLACK"
+        );
 
     board_print(&G->board);
     game_msg_flush(&G->message);

@@ -2,21 +2,23 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
 #include <ctype.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include "game_io.h"
 #include "util.h"
 
 void clear(void)
 {
+#ifndef __AVR__
     size_t        i    = 0;
     unsigned char CV[] = {
         0x1b, 0x5b, 0x33, 0x4a, 0x1b, 0x5b, 0x48, 0x1b, 0x5b, 0x32, 0x4a
     };
 
     for (i = 0; i < sizeof(CV); ++i)
-        putc(CV[i], stdout);
+        game_io_putc(CV[i]);
+#endif
 }
 
 int streq_ci(const char* str1, const char* str2)
@@ -56,7 +58,7 @@ void trim_left(char* str)
     int     br = 0;
 
 #ifdef DEBUG
-    printf("DEBUG trim_left before: `%s`\n", str);
+    game_io_printf("DEBUG trim_left before: `%s`\n", str);
 #endif
 
     len = (ssize_t)strlen(str);
@@ -70,7 +72,7 @@ void trim_left(char* str)
             str[cur] = str[cur + first_nb];
 
 #ifdef DEBUG
-    printf("DEBUG trim_left after: `%s`\n", str);
+    game_io_printf("DEBUG trim_left after: `%s`\n", str);
 #endif
 }
 
@@ -79,7 +81,7 @@ void trim_right(char* str)
     size_t len;
 
 #ifdef DEBUG
-    printf("DEBUG trim_right before: `%s`\n", str);
+    game_io_printf("DEBUG trim_right before: `%s`\n", str);
 #endif
 
     for (len = strlen(str); len > 0; --len)
@@ -90,7 +92,7 @@ void trim_right(char* str)
             len = 1;
 
 #ifdef DEBUG
-    printf("DEBUG trim_right after: `%s`\n", str);
+    game_io_printf("DEBUG trim_right after: `%s`\n", str);
 #endif
 }
 

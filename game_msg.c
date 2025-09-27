@@ -2,9 +2,10 @@
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
 #include "game_msg.h"
+#include "game_io.h"
 
 #include <stdarg.h>
-#include <stdio.h>
+#include <stddef.h>
 
 void game_msg_append(game_msg_p E, const char* str)
 {
@@ -19,7 +20,7 @@ void game_msg_append(game_msg_p E, const char* str)
 
 void game_msg_flush(game_msg_p E)
 {
-    puts(E->buf);
+    game_io_puts(E->buf);
     game_msg_clear(E);
 }
 
