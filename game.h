@@ -23,6 +23,8 @@ enum
     GD_DUMP,
     GD_RESTORE,
     GD_NOCLEAR,
+    GD_SAVE,
+    GD_SAVE_FORCE,
 
     /* Question Mark Command */
     GQ_LIST,

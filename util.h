@@ -33,4 +33,6 @@ extern void trim_left(char* str);
 extern void trim_right(char* str);
 extern void trim(char* str);
 
+extern int file_copy(int fdsrc, int fddst);
+
 #endif /* CMC_CHESS_UTIL_H */

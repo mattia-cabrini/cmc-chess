@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "game_io.h"
 #include "util.h"
@@ -108,4 +109,22 @@ const char* move_to_not_blank(const char* str)
         ;
 
     return str;
+}
+
+int file_copy(int fdsrc, int fddst)
+{
+    char    buf[2048];
+    ssize_t rres;
+    ssize_t wres;
+
+    lseek(fdsrc, 0, SEEK_SET);
+    while ((rres = read(fdsrc, buf, sizeof(buf))) > 0)
+    {
+        wres = write(fddst, buf, (size_t)rres);
+
+        if (wres != rres)
+            return 0;
+    }
+
+    return 1;
 }

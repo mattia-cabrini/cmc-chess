@@ -1,12 +1,15 @@
 /* Copyright (c) 2025 Mattia Cabrini      */
 /* SPDX-License-Identifier: AGPL-3.0-only */
 
+#include <errno.h>
 #include <stddef.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #include "board.h"
 #include "game.h"
 #include "game_assert.h"
+#include "game_history.h"
 #include "game_io.h"
 #include "util.h"
 
@@ -22,6 +25,7 @@ static void game_comm_dot_new(game_p G);
 static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
 static void game_comm_dot_noclear(game_p G);
+static void game_comm_dot_save(game_p G, int force);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
@@ -46,6 +50,8 @@ void game_init(game_p G)
 
 void game_run(game_p G)
 {
+    history_init();
+
     while (G->done == NULL)
     {
         if (G->opts & GOPT_CLEAR)
@@ -81,6 +87,12 @@ void game_run(game_p G)
         case GD_NOCLEAR:
             game_comm_dot_noclear(G);
             break;
+        case GD_SAVE:
+            game_comm_dot_save(G, 0);
+            break;
+        case GD_SAVE_FORCE:
+            game_comm_dot_save(G, 1);
+            break;
         case GQ_LIST:
             game_comm_qm_list(G);
             break;
@@ -100,6 +112,8 @@ void game_run(game_p G)
             break;
         }
     }
+
+    history_close();
 }
 
 static void game_read_command(game_p G)
@@ -109,6 +123,8 @@ static void game_read_command(game_p G)
         G->done = GAME_DONE_COULD_NOT_READ_STDIN;
         return;
     }
+
+    history_println(G->comm_buf);
 
     /* Remove trailing \n or \r */
     trim_right(G->comm_buf);
@@ -146,9 +162,19 @@ static void game_decode_command(game_p G)
             G->comm_type = GD_NEW;
             return;
         }
-        if (strneq_ci(G->comm_buf + 1, "noclear", 3))
+        if (strneq_ci(G->comm_buf + 1, "noclear", 7))
         {
             G->comm_type = GD_NOCLEAR;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "save!", 5))
+        {
+            G->comm_type = GD_SAVE_FORCE;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "save", 4))
+        {
+            G->comm_type = GD_SAVE;
             return;
         }
         break;
@@ -264,6 +290,57 @@ static void game_comm_dot_dump(game_p G)
 
     game_msg_append(&G->message, "dump done");
     fclose(fp);
+}
+
+static void game_comm_dot_save(game_p G, int force)
+{
+    const char* fpath;
+    char        mverr[64];
+    size_t      spc;
+    int         ok;
+    struct stat st;
+
+    for (spc = 0; G->comm_buf[spc] && G->comm_buf[spc] != ' '; ++spc)
+        ;
+
+    fpath = G->comm_buf + spc + 1;
+
+    if (!force)
+    {
+        ok = stat(fpath, &st) == 0;
+        if (ok)
+        {
+            game_msg_vappend(
+                &G->message,
+                "ERROR! COULD NOT SAVE! ",
+                fpath,
+                " already exists.\n",
+                NULL
+            );
+            return;
+        }
+        else
+        {
+            if (errno != ENOENT)
+            {
+                strerror_r(errno, mverr, sizeof(mverr));
+                game_msg_vappend(
+                    &G->message, "ERROR! COULD NOT SAVE! ", mverr, "\n", NULL
+                );
+            }
+        }
+    }
+
+    ok = history_mv(fpath);
+
+    if (ok)
+    {
+        game_msg_vappend(&G->message, "saved to ", fpath, "\n", NULL);
+        return;
+    }
+
+    strerror_r(errno, mverr, sizeof(mverr));
+    game_msg_vappend(&G->message, "ERROR! COULD NOT SAVE! ", mverr, "\n", NULL);
 }
 
 static void game_comm_dot_restore(game_p G)
