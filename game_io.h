@@ -4,7 +4,8 @@
 #ifndef CMC_CHESS_GAME_IO_H
 #define CMC_CHESS_GAME_IO_H
 
-extern void game_io_printf(const char* fmt, ...);
+extern void game_io_printf(const char* fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 extern void game_io_putc(int);
 extern void game_io_puts(const char*);
 
