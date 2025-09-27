@@ -391,7 +391,7 @@ static void game_comm_eq_set(game_p G)
 
 static void game_comm_qm_list(game_p G)
 {
-    struct coord_t DST[GAME_MAX_MOVE_FOR_ONE_PIECE];
+    struct coord_t DST[GAME_MAX_MOVES_FOR_ONE_PIECE];
     struct coord_t src;
     int            cur;
     int            ncord;
@@ -407,11 +407,12 @@ static void game_comm_qm_list(game_p G)
         return;
     }
 
-    ncord = board_list_moves(&G->board, &src, DST, GAME_MAX_MOVE_FOR_ONE_PIECE);
+    ncord =
+        board_list_moves(&G->board, &src, DST, GAME_MAX_MOVES_FOR_ONE_PIECE);
 
     if (ncord == 0)
         game_msg_vappend(&G->message, "! No move\n", NULL);
-    else if (ncord == -1 || ncord > GAME_MAX_MOVE_FOR_ONE_PIECE)
+    else if (ncord == -1 || ncord > GAME_MAX_MOVES_FOR_ONE_PIECE)
         game_msg_vappend(&G->message, "! ERR\n", NULL);
     else
     {

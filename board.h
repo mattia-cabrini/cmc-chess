@@ -10,9 +10,10 @@
 #include "coord.h"
 #include "game_assert.h"
 #include "int.h"
+#include "move.h"
 #include "piece.h"
 
-#define GAME_MAX_MOVE_FOR_ONE_PIECE 28
+#define GAME_MAX_MOVES_FOR_ONE_PIECE 28
 
 typedef struct board_t
 {
@@ -21,14 +22,6 @@ typedef struct board_t
     struct coord_t wking;
     struct coord_t bking;
 }* board_p;
-
-typedef struct move_t
-{
-    struct coord_t     source;
-    struct coord_t     dest;
-    struct coord_t     offset;
-    struct abs_coord_t abs_offset;
-}* move_p;
 
 extern const char* ILLEGAL_MOVE_FROM_OUT_OF_BOUND;
 extern const char* ILLEGAL_MOVE_TO_OUT_OF_BOUND;
@@ -90,21 +83,7 @@ extern int board_restore(board_p B, FILE* fp);
 
 extern int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n);
 
-/**
- * A move is a string like:
- *
- * FNTM:
- * - FN: coordinates from;
- * - TM: coordinates to.
- *
- * For example: "e2c4" means move e2 to c4.
- *
- * Return
- * NULL -> Legal move
- * *    -> ILLEGAL_MOVE_*
- */
-extern void move_init(move_p M, const char* str, size_t n);
-extern int  board_coord_out_of_bound(coord_p);
+extern int board_coord_out_of_bound(coord_p);
 
 extern int board_assert(board_p B, game_assert_p A);
 

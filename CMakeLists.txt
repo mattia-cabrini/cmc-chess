@@ -20,13 +20,13 @@ set(CMAKE_C_FLAGS_DEBUG "")
 
 set(SRC
 	main.c util.c 
-	piece.c board.c coord.c
+	piece.c board.c coord.c move.c
 	game.c game_assert.c game_msg.c game_io.c
 )
 
 set(H
 	util.h 
-	piece.h board.h coord.h
+	piece.h board.h coord.h move.h
 	game.h game_assert.h game_msg.h game_io.h
 )
 

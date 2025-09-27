@@ -59,8 +59,6 @@ const char* ILLEGAL_MOVE_QUEEN_DESC =
 const char* ILLEGAL_MOVE_KING_DESC =
     "King can only move one position and cannot take over";
 
-static void move_set_offset(move_p M);
-
 static const char* board_is_illegal_PAWN_move(board_p B, move_p M);
 static const char* board_is_illegal_ROOK_move(board_p B, move_p M);
 static const char* board_is_illegal_KNIGHT_move(board_p B, move_p M);
@@ -470,45 +468,6 @@ static const char* board_is_illegal_KING_move(board_p B, move_p M)
         return ILLEGAL_MOVE_KING_DESC;
 
     return NULL;
-}
-
-static void move_set_offset(move_p M)
-{
-    M->offset.row = (myint8_t)(M->dest.row - M->source.row);
-    M->offset.col = (myint8_t)(M->dest.col - M->source.col);
-
-    M->abs_offset.row =
-        (myuint8_t)(M->offset.row > 0 ? M->offset.row : -M->offset.row);
-    M->abs_offset.col =
-        (myuint8_t)(M->offset.col > 0 ? M->offset.col : -M->offset.col);
-}
-
-void move_init(move_p M, const char* str, size_t n)
-{
-    const char* trim_str = str;
-
-    if (n >= 4)
-        for (trim_str = str; *trim_str == ' '; ++trim_str)
-            ;
-
-    /* trim_str + 3 is the last position that should be read to init M:
-     * - 0, 1 for source;
-     * - 2, 3 for dest.
-     *
-     * If that position exceeds str boundary (that is str + n - 1), then the
-     * command is not vaild.
-     */
-    if (trim_str + 3 > str + n - 1)
-    {
-        M->source.row = M->source.col = -1;
-        M->dest.row = M->dest.col = -1;
-        return;
-    }
-
-    coord_init_by_str(&M->source, trim_str);
-    coord_init_by_str(&M->dest, trim_str + 2);
-
-    move_set_offset(M);
 }
 
 int board_coord_out_of_bound(coord_p C)
@@ -928,7 +887,7 @@ int board_list_moves(board_p B, coord_p src, coord_p dst, size_t n)
 
 static int board_can_move_nc(board_p B, coord_p src, coord_p king)
 {
-    struct coord_t DST[GAME_MAX_MOVE_FOR_ONE_PIECE];
+    struct coord_t DST[GAME_MAX_MOVES_FOR_ONE_PIECE];
     struct coord_t whence;
     piece_t        king_under_check;
     int            ncord;
