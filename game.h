@@ -22,6 +22,7 @@ enum
     GD_NEW,
     GD_DUMP,
     GD_RESTORE,
+    GD_NOCLEAR,
 
     /* Question Mark Command */
     GQ_LIST,
@@ -33,6 +34,11 @@ enum
 
     /* Play */
     GP_MOVE
+};
+
+enum
+{
+    GOPT_CLEAR = 1
 };
 
 typedef struct game_t
@@ -48,6 +54,8 @@ typedef struct game_t
     struct move_t comm_move;
 
     turn_t checkmate;
+
+    int opts;
 }* game_p;
 
 extern const char* GAME_DONE_COULD_NOT_READ_STDIN;

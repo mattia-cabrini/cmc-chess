@@ -21,6 +21,7 @@ static void game_comm_play_move(game_p G);
 static void game_comm_dot_new(game_p G);
 static void game_comm_dot_dump(game_p G);
 static void game_comm_dot_restore(game_p G);
+static void game_comm_dot_noclear(game_p G);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
@@ -39,6 +40,7 @@ void game_init(game_p G)
     game_msg_init(&G->message);
     G->turn      = cpWTURN;
     G->comm_type = GX_UNKNOWN;
+    G->opts |= GOPT_CLEAR;
     board_init(&G->board);
 }
 
@@ -46,7 +48,8 @@ void game_run(game_p G)
 {
     while (G->done == NULL)
     {
-        clear();
+        if (G->opts & GOPT_CLEAR)
+            clear();
 
         game_refresh(G);
 
@@ -74,6 +77,9 @@ void game_run(game_p G)
             break;
         case GD_RESTORE:
             game_comm_dot_restore(G);
+            break;
+        case GD_NOCLEAR:
+            game_comm_dot_noclear(G);
             break;
         case GQ_LIST:
             game_comm_qm_list(G);
@@ -138,6 +144,11 @@ static void game_decode_command(game_p G)
         if (strneq_ci(G->comm_buf + 1, "new", 3))
         {
             G->comm_type = GD_NEW;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "noclear", 3))
+        {
+            G->comm_type = GD_NOCLEAR;
             return;
         }
         break;
@@ -507,4 +518,12 @@ static void game_comm_eq_assert(game_p G)
     {
         G->done = GAME_DONE_ASSERT_FAILED;
     }
+}
+
+static void game_comm_dot_noclear(game_p G)
+{
+    if (G->opts & GOPT_CLEAR)
+        G->opts &= ~GOPT_CLEAR;
+    else
+        G->opts |= GOPT_CLEAR;
 }

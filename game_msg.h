@@ -10,10 +10,23 @@
 #define GAME_MSG_LENGTH 2048
 #endif
 
+#define GAME_MSG_BUFFER_NONE 1
+#define GAME_MSG_BUFFER_TOTAL 2
+
+#ifndef GAME_MSG_BUFFER_TYPE
+#define GAME_MSG_BUFFER_TYPE 2
+#endif
+
 typedef struct game_msg_t
 {
+#if GAME_MSG_BUFFER_TYPE == GAME_MSG_BUFFER_TOTAL
     char  buf[GAME_MSG_LENGTH];
     char* cur; /* Index of next writable char */
+#elif GAME_MSG_BUFFER_TYPE == GAME_MSG_BUFFER_NONE
+    char nobuf;
+#else
+#error "GAME_MSG_BUFFER_TYPE has got an illegal value"
+#endif
 }* game_msg_p;
 
 extern void game_msg_init(game_msg_p E);
