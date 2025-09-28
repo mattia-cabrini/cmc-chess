@@ -26,6 +26,7 @@ enum
     GD_SAVE,
     GD_SAVE_FORCE,
     GD_COMMENT, /* .. */
+    GD_LOAD,
 
     /* Question Mark Command */
     GQ_LIST,
@@ -67,7 +68,7 @@ extern const char* GAME_DONE_COMM_QUIT;
 extern const char* GAME_DONE_ASSERT_FAILED;
 extern const char* GAME_DONE_ASSERT_PARSE;
 
-extern void game_init(game_p);
+extern void game_init(game_p G, int flags);
 extern void game_run(game_p);
 
 #ifdef DEBUG

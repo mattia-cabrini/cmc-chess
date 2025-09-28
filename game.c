@@ -19,6 +19,9 @@ static void game_refresh(game_p G);
 static void game_read_command(game_p G);
 static void game_decode_command(game_p G);
 static void game_next_turn(game_p G);
+static void game_set_flag(game_p G, int flag);
+static void game_unset_flag(game_p G, int flag);
+static int  game_has_flag(game_p G, int flag);
 
 static void game_comm_play_move(game_p G);
 
@@ -28,6 +31,7 @@ static void game_comm_dot_restore(game_p G);
 static void game_comm_dot_noclear(game_p G);
 static void game_comm_dot_save(game_p G, int force);
 static void game_comm_dot_comment(game_p G);
+static void game_comm_dot_load(game_p G);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
@@ -40,15 +44,13 @@ const char* GAME_DONE_COMM_QUIT            = "closed by user";
 const char* GAME_DONE_ASSERT_FAILED        = "assert failed";
 const char* GAME_DONE_ASSERT_PARSE         = "could not parse assert";
 
-void game_init(game_p G)
+void game_init(game_p G, int flags)
 {
     memset(G, 0, sizeof(struct game_t));
     game_msg_init(&G->message);
     G->turn      = cpWTURN;
     G->comm_type = GX_UNKNOWN;
-
-    G->opts |= GOPT_CLEAR;
-    G->opts &= ~GOPT_IN_LOAD;
+    G->opts      = flags;
 
     board_init(&G->board);
 }
@@ -60,7 +62,7 @@ void game_run(game_p G)
 
     while (G->done == NULL)
     {
-        if (G->opts & GOPT_CLEAR)
+        if (game_has_flag(G, GOPT_CLEAR))
             clear();
 
         game_refresh(G);
@@ -94,18 +96,33 @@ void game_run(game_p G)
             game_comm_dot_noclear(G);
             break;
         case GD_SAVE:
-            game_comm_dot_save(G, 0);
+            if (!game_has_flag(G, GOPT_IN_LOAD))
+                game_comm_dot_save(G, 0);
+#ifdef DEBUG
+            else
+                fprintf(stderr, "skipped GD_SAVE due to GOPT_IN_LOAD.\n");
+#endif
             break;
         case GD_SAVE_FORCE:
-            game_comm_dot_save(G, 1);
+            if (!game_has_flag(G, GOPT_IN_LOAD))
+                game_comm_dot_save(G, 1);
+#ifdef DEBUG
+            else
+                fprintf(stderr, "skipped GD_SAVE_FORCE due to GOPT_IN_LOAD.\n");
+#endif
             break;
         case GD_COMMENT:
-            if (G->opts & GOPT_IN_LOAD)
+            if (game_has_flag(G, GOPT_IN_LOAD))
                 game_comm_dot_comment(G);
             break;
+        case GD_LOAD:
+            game_comm_dot_load(G);
+            break;
+
         case GQ_LIST:
             game_comm_qm_list(G);
             break;
+
         case GE_CLEAR:
             game_comm_eq_clear(G);
             break;
@@ -115,6 +132,7 @@ void game_run(game_p G)
         case GE_ASSERT:
             game_comm_eq_assert(G);
             break;
+
         case GP_MOVE:
             game_comm_play_move(G);
             break;
@@ -130,8 +148,17 @@ static void game_read_command(game_p G)
 {
     if (!game_io_gets(G->comm_buf, sizeof(G->comm_buf)))
     {
-        G->done = GAME_DONE_COULD_NOT_READ_STDIN;
-        return;
+        if (game_has_flag(G, GOPT_IN_LOAD))
+        {
+            G->comm_buf[0] = '\0';
+            game_unset_flag(G, GOPT_IN_LOAD);
+            game_msg_append(&G->message, "Loaded.\n");
+        }
+        else
+        {
+            G->done = GAME_DONE_COULD_NOT_READ_STDIN;
+            return;
+        }
     }
 
     history_println(G->comm_buf);
@@ -185,6 +212,11 @@ static void game_decode_command(game_p G)
         if (strneq_ci(G->comm_buf + 1, "save", 4))
         {
             G->comm_type = GD_SAVE;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "load", 4))
+        {
+            G->comm_type = GD_LOAD;
             return;
         }
         if (strneq_ci(G->comm_buf + 1, ".", 1))
@@ -269,7 +301,7 @@ static void game_comm_play_move(game_p G)
     }
 }
 
-static void game_comm_dot_new(game_p G) { game_init(G); }
+static void game_comm_dot_new(game_p G) { game_init(G, G->opts); }
 
 static void game_comm_dot_dump(game_p G)
 {
@@ -616,16 +648,49 @@ static void game_comm_eq_assert(game_p G)
 
 static void game_comm_dot_noclear(game_p G)
 {
-    if (G->opts & GOPT_CLEAR)
-        G->opts &= ~GOPT_CLEAR;
+    if (game_has_flag(G, GOPT_CLEAR))
+        game_unset_flag(G, GOPT_CLEAR);
     else
-        G->opts |= GOPT_CLEAR;
+        game_set_flag(G, GOPT_CLEAR);
 }
 
 static void game_comm_dot_comment(game_p G)
 {
     game_msg_append(&G->message, G->comm_buf + 2);
 }
+
+static void game_comm_dot_load(game_p G)
+{
+    const char* fpath;
+    char        fserr[64];
+    size_t      spc;
+    FILE*       fp;
+
+    for (spc = 0; G->comm_buf[spc] && G->comm_buf[spc] != ' '; ++spc)
+        ;
+
+    fpath = G->comm_buf + spc + 1;
+
+    fp    = fopen(fpath, "r");
+    if (fp == NULL)
+    {
+        strerror_r(errno, fserr, sizeof(fserr));
+        game_msg_vappend(
+            &G->message, "ERROR! COULD NOT LOAD! ", fserr, "\n", NULL
+        );
+        return;
+    }
+
+    game_init(G, G->opts);
+    game_io_set_stream_in(fp);
+    game_set_flag(G, GOPT_IN_LOAD);
+}
+
+static void game_set_flag(game_p G, int flag) { G->opts |= flag; }
+
+static void game_unset_flag(game_p G, int flag) { G->opts &= ~flag; }
+
+static int game_has_flag(game_p G, int flag) { return G->opts & flag; }
 
 #ifdef DEBUG
 void game_meminfo(void)
