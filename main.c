@@ -5,6 +5,7 @@
 
 #include "board.h"
 #include "coord.h"
+#include "exit_codes.h"
 #include "game.h"
 #include "game_msg.h"
 #include "util.h"
@@ -28,16 +29,16 @@ int main(int argc, char** argv)
         {
 #ifdef DEBUG
             meminfo();
-            return 0;
+            return CHESS_OK;
 #else
             fprintf(stderr, "`%s` not available: !def DEBUG.\n", argv[1]);
-            return 4;
+            return CHESS_COMMAND_NA_DEBUG_UNDEF;
 #endif
         }
         else
         {
             fprintf(stderr, "`%s`: not valid command.\n", argv[1]);
-            return 5;
+            return CHESS_COMMAND_UNKNOWN;
         }
     }
 
@@ -51,20 +52,20 @@ int main(int argc, char** argv)
     else if (game.done == GAME_DONE_ASSERT_FAILED)
     {
         fprintf(stderr, "Error: %s.\n%s\n", game.done, game.comm_buf);
-        return 2;
+        return CHESS_ASSERT_FAILED;
     }
     else if (game.done == GAME_DONE_ASSERT_PARSE)
     {
         fprintf(stderr, "Error: %s.\n", game.done);
-        return 3;
+        return CHESS_ASSERT_PARSE_FAILED;
     }
     else
     {
         fprintf(stderr, "Error: %s.\n", game.done);
-        return 1;
+        return CHESS_GAME_ERROR;
     }
 
-    return 0;
+    return CHESS_OK;
 }
 
 #ifdef DEBUG

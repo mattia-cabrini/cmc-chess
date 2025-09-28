@@ -56,6 +56,7 @@ void game_init(game_p G)
 void game_run(game_p G)
 {
     history_init();
+    game_io_init();
 
     while (G->done == NULL)
     {

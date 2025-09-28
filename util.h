@@ -4,6 +4,8 @@
 #ifndef CMC_CHESS_UTIL_H
 #define CMC_CHESS_UTIL_H
 
+#include "exit_codes.h"
+
 #include <stdlib.h>
 
 #define assert_return_void(cond)                                               \
@@ -20,7 +22,10 @@
 #define assert_fatal(cond, n)                                                  \
     {                                                                          \
         if (!(cond))                                                           \
+        {                                                                      \
+            fprintf(stderr, "Fatal error! %s\n", chess_error_str(n));          \
             exit(n);                                                           \
+        }                                                                      \
     }
 
 extern void clear(void);

@@ -19,13 +19,13 @@ set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_C_FLAGS_DEBUG "")
 
 set(SRC
-	main.c util.c 
+	main.c util.c exit_codes.c 
 	piece.c board.c coord.c move.c
 	game.c game_assert.c game_msg.c game_io.c game_history.c
 )
 
 set(H
-	util.h 
+	util.h exit_codes.h 
 	piece.h board.h coord.h move.h
 	game.h game_assert.h game_msg.h game_io.h game_history.h
 )
