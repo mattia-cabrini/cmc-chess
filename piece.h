@@ -31,6 +31,7 @@ extern const turn_t cpBTURN;
 extern const char* cpWHITES;
 extern const char* cpBLACKS;
 
-extern char piece_to_char(piece_t p);
+extern char    piece_to_char(piece_t p);
+extern piece_t piece_from_char(char p, turn_t t);
 
 #endif /* CMC_CHESS_PIECE_H */

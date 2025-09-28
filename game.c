@@ -170,6 +170,8 @@ static void game_read_command(game_p G)
 
 static void game_decode_command(game_p G)
 {
+    size_t len;
+
     if (streq_ci(G->comm_buf, "quit"))
     {
         G->done = GAME_DONE_COMM_QUIT;
@@ -249,11 +251,17 @@ static void game_decode_command(game_p G)
         G->comm_type = GQ_LIST;
         return;
         break;
+
     default:
-        if (strlen(G->comm_buf) == 4 && G->comm_buf[0] != '?')
+        len = strlen(G->comm_buf);
+        if (len >= 4 && len <= 5)
         {
             move_init(&G->comm_move, G->comm_buf, sizeof(G->comm_buf));
             G->comm_type = GP_MOVE;
+
+            /* If len == 4 G->comm_buf[4] is '\0' and hence it gets correctly
+             * decoded to cpEEMPTY */
+            G->pawn_morph = piece_from_char(G->comm_buf[4], G->turn);
             return;
         }
     }
@@ -279,8 +287,9 @@ static void game_comm_play_move(game_p G)
         return;
     }
 
-    illegal_move =
-        board_check_move(&G->board, &G->comm_move, G->turn, &whence_check);
+    illegal_move = board_check_move(
+        &G->board, &G->comm_move, G->pawn_morph, G->turn, &whence_check
+    );
     if (illegal_move != NULL)
     {
         game_msg_vappend(
@@ -290,7 +299,7 @@ static void game_comm_play_move(game_p G)
     }
     else
     {
-        board_exec(&G->board, &G->comm_move);
+        board_exec(&G->board, &G->comm_move, G->pawn_morph);
         game_next_turn(G);
     }
 
@@ -707,11 +716,13 @@ void game_meminfo(void)
     printf(" opts:         %lu\n", sizeof(T.opts));
     printf(" turn:         %lu\n", sizeof(T.turn));
     printf(" checkmate:    %lu\n", sizeof(T.checkmate));
+    printf(" pawn_morph:   %lu\n", sizeof(T.pawn_morph));
     printf(
         " ------------- %lu\n",
         sizeof(T.message) + sizeof(T.board) + sizeof(T.comm_buf) +
             sizeof(T.done) + sizeof(T.turn) + sizeof(T.comm_type) +
-            sizeof(T.comm_move) + sizeof(T.checkmate) + sizeof(T.opts)
+            sizeof(T.comm_move) + sizeof(T.checkmate) + sizeof(T.opts) +
+            sizeof(T.pawn_morph)
     );
 }
 #endif

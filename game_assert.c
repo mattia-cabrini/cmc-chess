@@ -68,6 +68,7 @@ void game_assert_parse(
     A->src.row    = -1;
     A->dst.row    = -1;
     A->whence.row = -1;
+    A->pawn_morph = cpEEMPTY;
 
     A->rev        = 0;
 
@@ -107,6 +108,14 @@ void game_assert_parse(
             str = parse_coord(&A->whence, str);
             if (str == NULL)
                 strncpy(err, "could not read destination", err_length);
+        }
+        else if (streq_ci(attr_name, "pawn-morph"))
+        {
+            str = parse_int(&tmp, str);
+            if (str == NULL)
+                strncpy(err, "could not read pawn-morph", err_length);
+            else
+                A->pawn_morph = (piece_t)tmp;
         }
         else if (streq_ci(attr_name, "piece"))
         {
@@ -249,15 +258,17 @@ void game_assert_meminfo(void)
     printf("struct game_assert_t: %lu\n", sizeof(T));
     printf(" kind:                %lu\n", sizeof(T.kind));
     printf(" rev:                 %lu\n", sizeof(T.rev));
-    printf(" piece:               %lu\n", sizeof(T.piece));
-    printf(" turn:                %lu\n", sizeof(T.turn));
     printf(" src:                 %lu\n", sizeof(T.src));
     printf(" dst:                 %lu\n", sizeof(T.dst));
     printf(" whence:              %lu\n", sizeof(T.whence));
+    printf(" piece:               %lu\n", sizeof(T.piece));
+    printf(" turn:                %lu\n", sizeof(T.turn));
+    printf(" pawn_morph:          %lu\n", sizeof(T.pawn_morph));
     printf(
         " -------------------- %lu\n",
         sizeof(T.kind) + sizeof(T.rev) + sizeof(T.piece) + sizeof(T.turn) +
-            sizeof(T.src) + sizeof(T.dst) + sizeof(T.whence)
+            sizeof(T.src) + sizeof(T.dst) + sizeof(T.whence) +
+            sizeof(T.pawn_morph)
     );
 }
 #endif

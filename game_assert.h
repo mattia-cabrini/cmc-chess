@@ -23,12 +23,13 @@ typedef struct game_assert_t
     int kind;
     int rev; /* 0 (default): assertion must pass; 1: assertion must fail */
 
-    piece_t piece;
-    turn_t  turn;
-
     struct coord_t src;
     struct coord_t dst;
     struct coord_t whence;
+
+    piece_t piece;
+    turn_t  turn;
+    piece_t pawn_morph;
 }* game_assert_p;
 
 extern void game_assert_parse(

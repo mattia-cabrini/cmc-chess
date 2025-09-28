@@ -1,0 +1,101 @@
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=5
+f7f8q
+=assert piece-is src=f8 piece=5
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-5
+f2f1Q
+=assert piece-is src=f1 piece=-5
+
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-5 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=5
+f7f8q
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-5
+
+.new
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=4
+f7f8b
+=assert piece-is src=f8 piece=4
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-4
+f2f1B
+=assert piece-is src=f1 piece=-4
+
+.new
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=3
+f7f8n
+=assert piece-is src=f8 piece=3
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-3
+f2f1N
+=assert piece-is src=f1 piece=-3
+
+.new
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=2
+f7f8r
+=assert piece-is src=f8 piece=2
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-2
+f2f1R
+=assert piece-is src=f1 piece=-2
+
+.new
+=clear
+
+=set f7 1
+=assert piece-can-move src=f7 dst=f8 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=1 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=6 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-1 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-2 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-3 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-4 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-5 rev=1
+=assert piece-can-move src=f7 dst=f8 pawn-morph=-6 rev=1
+.. Change turn...
+f7f8n
+
+=set f2 -1
+=assert piece-can-move src=f2 dst=f1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=-6 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=1 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=2 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=3 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=4 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=5 rev=1
+=assert piece-can-move src=f2 dst=f1 pawn-morph=6 rev=1
+.. Change turn...
+f2f1N
+
+quit

@@ -32,6 +32,7 @@ extern const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET;
 extern const char* ILLEGAL_MOVE_NO_MOVE;
 extern const char* ILLEGAL_MOVE_TAKE_OVER_SELF;
 extern const char* ILLEGAL_MOVE_CHECK;
+extern const char* ILLEGAL_MOVE_PAWN_MORPH;
 
 extern const char* ILLEGAL_MOVE_PAWN_DESC;
 extern const char* ILLEGAL_MOVE_ROOK_DESC;
@@ -46,12 +47,14 @@ extern void    board_init(board_p B);
 extern void    board_print(board_p B);
 
 /* If a check should occur, whence tells what piece would take over the king */
-const char* board_check_move(board_p B, move_p M, turn_t turn, coord_p whence);
+const char* board_check_move(
+    board_p B, move_p M, piece_t pawn_morph, turn_t turn, coord_p whence
+);
 
 /**
  * Unsafe
  */
-extern void board_exec(board_p B, move_p M);
+extern void board_exec(board_p B, move_p M, piece_t pawn_morph);
 
 /* Check if the parameter king is under check and sets whence.
  *

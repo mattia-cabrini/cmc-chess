@@ -41,6 +41,8 @@ const char* ILLEGAL_MOVE_TAKE_OVER_SELF =
 const char* ILLEGAL_MOVE_NOT_IMPLEMENTED_YET = "not implemented, yet";
 const char* ILLEGAL_MOVE_CHECK =
     "cannot move! Do you want to get under check? Crazy";
+const char* ILLEGAL_MOVE_PAWN_MORPH = "pawn should morph into something when "
+                                      "reaching the other side of the board";
 
 const char* ILLEGAL_MOVE_PAWN_DESC =
     "pawn can only go forward:\n - By two position, if still in default "
@@ -205,7 +207,9 @@ static const char* board_check_move_direction(board_p B, move_p M, turn_t turn)
     return NULL;
 }
 
-const char* board_check_move(board_p B, move_p M, turn_t turn, coord_p whence)
+const char* board_check_move(
+    board_p B, move_p M, piece_t pawn_morph, turn_t turn, coord_p whence
+)
 {
     const char*    err_direction;
     piece_t        o_src;
@@ -217,6 +221,14 @@ const char* board_check_move(board_p B, move_p M, turn_t turn, coord_p whence)
     err_direction = board_check_move_direction(B, M, turn);
     if (err_direction != NULL)
         return err_direction;
+
+    if (M->dest.row == 0 && board_get_at(B, &M->source) == cpWPAWN &&
+        !(pawn_morph > 1 && pawn_morph < 6))
+        return ILLEGAL_MOVE_PAWN_MORPH;
+
+    if (M->dest.row == 7 && board_get_at(B, &M->source) == cpBPAWN &&
+        !(pawn_morph < -1 && pawn_morph > -6))
+        return ILLEGAL_MOVE_PAWN_MORPH;
 
     /* Save the original pieces and simulate execution */
     o_src = board_get_at(B, &M->source);
@@ -480,13 +492,18 @@ int board_coord_out_of_bound(coord_p C)
     return 0;
 }
 
-void board_exec(board_p B, move_p M)
+void board_exec(board_p B, move_p M, piece_t pawn_morph)
 {
     piece_t tmp;
 
     tmp = board_get_at(B, &M->source);
     board_set_at(B, &M->source, cpEEMPTY);
-    board_set_at(B, &M->dest, tmp);
+
+    if ((tmp == cpWPAWN && M->dest.row == 0) ||
+        (tmp == cpBPAWN && M->dest.row == 7))
+        board_set_at(B, &M->dest, pawn_morph);
+    else
+        board_set_at(B, &M->dest, tmp);
 
     if (tmp == cpWKING)
         B->wking = M->dest;
@@ -1036,7 +1053,7 @@ int board_assert(board_p B, game_assert_p A)
 
             move_set_offset(&M);
 
-            err = board_check_move(B, &M, A->turn, &whence);
+            err = board_check_move(B, &M, A->pawn_morph, A->turn, &whence);
 
             /* Can move: ok */
             if (err == NULL)

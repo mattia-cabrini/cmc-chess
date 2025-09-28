@@ -61,6 +61,8 @@ typedef struct game_t
 
     turn_t turn;
     turn_t checkmate;
+
+    piece_t pawn_morph;
 }* game_p;
 
 extern const char* GAME_DONE_COULD_NOT_READ_STDIN;
