@@ -32,6 +32,8 @@ static void game_comm_dot_noclear(game_p G);
 static void game_comm_dot_save(game_p G, int force);
 static void game_comm_dot_comment(game_p G);
 static void game_comm_dot_load(game_p G);
+static void game_comm_dot_norecord(game_p G);
+static void game_comm_dot_record(game_p G);
 
 static void game_comm_eq_clear(game_p G);
 static void game_comm_eq_set(game_p G);
@@ -118,6 +120,12 @@ void game_run(game_p G)
         case GD_LOAD:
             game_comm_dot_load(G);
             break;
+        case GD_NO_RECORD:
+            game_comm_dot_norecord(G);
+            break;
+        case GD_RECORD:
+            game_comm_dot_record(G);
+            break;
 
         case GQ_LIST:
             game_comm_qm_list(G);
@@ -161,7 +169,8 @@ static void game_read_command(game_p G)
         }
     }
 
-    history_println(G->comm_buf);
+    if (game_has_flag(G, GOPT_REC))
+        history_println(G->comm_buf);
 
     /* Remove trailing \n or \r */
     trim_right(G->comm_buf);
@@ -186,6 +195,16 @@ static void game_decode_command(game_p G)
     switch (G->comm_buf[0])
     {
     case '.':
+        if (strneq_ci(G->comm_buf + 1, "norecord", 8))
+        {
+            G->comm_type = GD_NO_RECORD;
+            return;
+        }
+        if (strneq_ci(G->comm_buf + 1, "record", 6))
+        {
+            G->comm_type = GD_RECORD;
+            return;
+        }
         if (strneq_ci(G->comm_buf + 1, "dump", 4))
         {
             G->comm_type = GD_DUMP;
@@ -700,6 +719,19 @@ static void game_set_flag(game_p G, int flag) { G->opts |= flag; }
 static void game_unset_flag(game_p G, int flag) { G->opts &= ~flag; }
 
 static int game_has_flag(game_p G, int flag) { return G->opts & flag; }
+
+static void game_comm_dot_norecord(game_p G)
+{
+    game_unset_flag(G, GOPT_REC);
+    game_msg_append(&G->message, "Record is disabled");
+}
+
+static void game_comm_dot_record(game_p G)
+{
+    game_set_flag(G, GOPT_REC);
+    game_msg_append(&G->message, "Record is enabled");
+    history_println(G->comm_buf);
+}
 
 #ifdef DEBUG
 void game_meminfo(void)

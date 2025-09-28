@@ -42,7 +42,7 @@ int main(int argc, char** argv)
         }
     }
 
-    game_init(&game, GOPT_CLEAR);
+    game_init(&game, GOPT_CLEAR | GOPT_REC);
     game_run(&game);
 
     if (game.done == GAME_DONE_COMM_QUIT)

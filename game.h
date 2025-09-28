@@ -27,6 +27,8 @@ enum
     GD_SAVE_FORCE,
     GD_COMMENT, /* .. */
     GD_LOAD,
+    GD_NO_RECORD,
+    GD_RECORD,
 
     /* Question Mark Command */
     GQ_LIST,
@@ -42,8 +44,11 @@ enum
 
 enum
 {
-    GOPT_CLEAR   = 1, /* 1: clear afet each command; 0: do not clear */
-    GOPT_IN_LOAD = 2  /* 1: load in progress; 0: load not in progress */
+    GOPT_CLEAR   = 0x1, /* Set: clear afet each command; Or: do not clear */
+    GOPT_IN_LOAD = 0x2, /* Set: load in progress; Or: load not in progress */
+    GOPT_REC     = 0x4, /* Set: store for all command; Or: no store at all */
+
+    ___cmc_chess_game_h_gopt_sentinel
 };
 
 typedef struct game_t
