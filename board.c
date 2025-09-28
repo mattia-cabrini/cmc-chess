@@ -16,7 +16,7 @@ typedef struct simul_restore_t
 }* simul_restore_p;
 
 const piece_t DEFAULT_BOARD[] = {
-    cpBROOK,  cpBKNIGHT, cpBBISHOP, cpBKING,  cpBQUEEN, cpBBISHOP, cpBKNIGHT,
+    cpBROOK,  cpBKNIGHT, cpBBISHOP, cpBQUEEN, cpBKING,  cpBBISHOP, cpBKNIGHT,
     cpBROOK,  cpBPAWN,   cpBPAWN,   cpBPAWN,  cpBPAWN,  cpBPAWN,   cpBPAWN,
     cpBPAWN,  cpBPAWN,   cpEEMPTY,  cpEEMPTY, cpEEMPTY, cpEEMPTY,  cpEEMPTY,
     cpEEMPTY, cpEEMPTY,  cpEEMPTY,  cpEEMPTY, cpEEMPTY, cpEEMPTY,  cpEEMPTY,
@@ -24,7 +24,7 @@ const piece_t DEFAULT_BOARD[] = {
     cpEEMPTY, cpEEMPTY,  cpEEMPTY,  cpEEMPTY, cpEEMPTY, cpEEMPTY,  cpEEMPTY,
     cpEEMPTY, cpEEMPTY,  cpEEMPTY,  cpEEMPTY, cpEEMPTY, cpEEMPTY,  cpWPAWN,
     cpWPAWN,  cpWPAWN,   cpWPAWN,   cpWPAWN,  cpWPAWN,  cpWPAWN,   cpWPAWN,
-    cpWROOK,  cpWKNIGHT, cpWBISHOP, cpWKING,  cpWQUEEN, cpWBISHOP, cpWKNIGHT,
+    cpWROOK,  cpWKNIGHT, cpWBISHOP, cpWQUEEN, cpWKING,  cpWBISHOP, cpWKNIGHT,
     cpWROOK
 };
 
@@ -123,9 +123,9 @@ void board_init(board_p B)
     memcpy(B->board, DEFAULT_BOARD, sizeof(DEFAULT_BOARD));
 
     B->wking.row = 7;
-    B->wking.col = 3;
+    B->wking.col = 4;
     B->bking.row = 0;
-    B->bking.col = 3;
+    B->bking.col = 4;
 }
 
 void board_print(board_p B)
